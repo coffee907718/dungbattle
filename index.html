@@ -17,7 +17,8 @@
             --player-red: #d32f2f;
             --player-blue: #1976d2;
             --accent: #fbc02d;
-            --bg: #efebe9;
+            --bg: #e6dace; /* Warm light brown theme */
+            --card-bg: rgba(245, 238, 230, 0.95); /* Matte glassmorphism card base */
             --outline: #21100b;
         }
 
@@ -59,7 +60,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(239, 235, 233, 0.5); /* Semi-transparent bg */
+            background: rgba(230, 218, 206, 0.5); /* Semi-transparent warm brown */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             display: flex;
@@ -70,7 +71,7 @@
         }
 
         .welcome-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg);
             padding: 35px 25px;
             border: 4px solid var(--outline);
             border-radius: 16px;
@@ -127,7 +128,7 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             padding: 30px;
@@ -162,7 +163,7 @@
             font-weight: 700;
             outline: none;
             text-align: center;
-            background-color: #fafafa;
+            background-color: #f7f0e8;
             color: var(--brown-dark);
             user-select: auto;
             -webkit-user-select: auto;
@@ -200,16 +201,16 @@
         }
         
         button:disabled { 
-            background: #e0e0e0; 
+            background: #e0d4c8; 
             cursor: not-allowed; 
             box-shadow: none; 
             transform: none; 
-            border-color: #9e9e9e;
-            color: #757575;
+            border-color: #bcaaa4;
+            color: #8d6e63;
         }
 
         .room-display-container {
-            background: #f5f5f5;
+            background: #e0d4c8;
             border: 3px dashed var(--brown-med);
             padding: 15px;
             margin: 20px 0;
@@ -329,7 +330,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             border: 4px solid var(--outline);
             border-radius: 16px;
@@ -376,8 +377,21 @@
             stroke: rgba(255,255,255,0.9);
         }
 
-        .fs-btn { top: max(15px, env(safe-area-inset-top)); }
         .sound-btn { top: max(75px, calc(env(safe-area-inset-top) + 60px)); }
+        
+        /* Glassmorphic Pink Full Screen Button */
+        .fs-btn { 
+            top: max(15px, env(safe-area-inset-top)); 
+            background: rgba(244, 143, 177, 0.45); 
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .fs-btn svg {
+            stroke: var(--brown-dark);
+            filter: none;
+        }
         
         .fs-btn:active, .sound-btn:active { 
             transform: scale(0.9);
@@ -425,8 +439,8 @@
             margin-bottom: 8px;
             padding: 10px 12px;
             border-radius: 8px;
-            background: #fff;
-            border: 2px solid #e0e0e0;
+            background: #fdfaf7;
+            border: 2px solid #e0d4c8;
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         
@@ -457,7 +471,7 @@
         }
 
         .exit-card {
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
             border: 4px solid var(--outline);
             border-radius: 16px;
@@ -487,7 +501,7 @@
             box-shadow: 2px 2px 0px var(--outline);
         }
 
-        #btn-exit-cancel { background: linear-gradient(145deg, #f5f5f5, #e0e0e0); color: #333; }
+        #btn-exit-cancel { background: linear-gradient(145deg, #f5eadd, #d6c6b7); color: #333; }
         #btn-exit-ok { background: linear-gradient(145deg, var(--player-red), #b71c1c); color: white; border-color: #8e0000; }
 
         @media screen and (orientation: landscape) {
@@ -548,7 +562,7 @@ Tap the <strong>Share</strong> icon, select <strong>"Add to Home Screen"</strong
             </div>
             <button id="btn-copy" style="font-size: 0.9rem; padding: 10px; width: 160px; margin: 0 auto 20px;">COPY ID</button>
             
-            <div id="host-controls" style="display: none; margin-bottom: 20px; padding-top: 15px; border-top: 2px dashed #e0e0e0;">
+            <div id="host-controls" style="display: none; margin-bottom: 20px; padding-top: 15px; border-top: 2px dashed #bcaaa4;">
                 <label style="font-weight: bold; font-size: 0.9rem; color: var(--brown-med);">POINTS TO WIN:</label>
                 <select id="win-points-select" style="padding: 10px; font-size: 1rem; margin-top: 8px;">
                     <option value="3">3 Points</option>
@@ -558,7 +572,7 @@ Tap the <strong>Share</strong> icon, select <strong>"Add to Home Screen"</strong
                 </select>
             </div>
 
-            <div id="player-list" style="text-align: left; background: #fafafa; padding: 12px; border-radius: 10px; border: 2px solid #eee; min-height: 150px; max-height: 250px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <div id="player-list" style="text-align: left; background: #f2e9e0; padding: 12px; border-radius: 10px; border: 2px solid #e0d4c8; min-height: 150px; max-height: 250px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
                 </div>
             <div id="lobby-status" class="status-msg">Waiting...</div>
             <button id="btn-start" disabled style="display: none; background: linear-gradient(145deg, #4caf50, #2e7d32); color: white; border-color: #1b5e20;">START BATTLE</button>
@@ -1089,7 +1103,7 @@ const Game = {
         if (Net.isHost) {
             controls.innerHTML = `
                 <button id="btn-rematch" style="background: linear-gradient(145deg, var(--accent), #f57f17);">REMATCH</button>
-                <button id="btn-lobby" style="background: linear-gradient(145deg, #f5f5f5, #e0e0e0); color: #333;">LOBBY / EXIT</button>
+                <button id="btn-lobby" style="background: linear-gradient(145deg, #f5eadd, #d6c6b7); color: #333;">LOBBY / EXIT</button>
             `;
             document.getElementById('btn-rematch').onclick = () => {
                 Net.broadcast('START_GAME', { players: Net.players, maxScore: Net.maxScore });
@@ -1100,7 +1114,7 @@ const Game = {
                 location.reload();
             };
         } else {
-            controls.innerHTML = `<button onclick="location.reload()" style="background: linear-gradient(145deg, #f5f5f5, #e0e0e0); color: #333;">EXIT GAME</button>`;
+            controls.innerHTML = `<button onclick="location.reload()" style="background: linear-gradient(145deg, #f5eadd, #d6c6b7); color: #333;">EXIT GAME</button>`;
         }
 
         this.running = true;
