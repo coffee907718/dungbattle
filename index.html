@@ -17,8 +17,8 @@
             --player-red: #d32f2f;
             --player-blue: #1976d2;
             --accent: #fbc02d;
-            --bg: #e6dace; /* Warm light brown theme */
-            --card-bg: rgba(245, 238, 230, 0.95); /* Matte glassmorphism card base */
+            --bg: #e6dace;
+            --card-bg: rgba(245, 238, 230, 0.95);
             --outline: #21100b;
         }
 
@@ -53,14 +53,13 @@
             position: relative;
         }
 
-        /* --- Welcome Popup Styles --- */
         #welcome-dialog {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(230, 218, 206, 0.5); /* Semi-transparent warm brown */
+            background: rgba(230, 218, 206, 0.5);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             display: flex;
@@ -105,7 +104,6 @@
             margin: 0;
             width: 100%;
         }
-        /* -------------------------- */
 
         .screen {
             position: absolute;
@@ -307,7 +305,7 @@
             border-radius: 50%;
             pointer-events: none;
             box-shadow: 0 8px 15px rgba(0,0,0,0.3), inset -2px -2px 6px rgba(0,0,0,0.1);
-            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         #overlay {
@@ -379,7 +377,6 @@
 
         .sound-btn { top: max(75px, calc(env(safe-area-inset-top) + 60px)); }
         
-        /* Glassmorphic Pink Full Screen Button */
         .fs-btn { 
             top: max(15px, env(safe-area-inset-top)); 
             background: rgba(244, 143, 177, 0.45); 
@@ -922,6 +919,7 @@ const Game = {
     particles: [],
     
     joystick: { active: false, maxRadius: 55, dx: 0, dy: 0, id: null },
+    joystickCenter: { x: 0, y: 0 },
     lastSyncTime: 0,
     lastTime: 0,
     animationFrameId: null,
@@ -929,12 +927,18 @@ const Game = {
     wasTouching: false,
     lastBallX: 350,
     lastBallY: 500,
+    lastMx: 0,
+    lastMy: 0,
+    lastInputTime: 0,
 
     init() {
         this.cvs = document.getElementById('gameCanvas');
         this.ctx = this.cvs.getContext('2d', { alpha: false });
         this.fit();
-        window.onresize = () => this.fit();
+        window.addEventListener('resize', () => {
+            this.fit();
+            this.updateJoystickCenter();
+        });
         this.setupJoystick();
     },
 
@@ -947,16 +951,20 @@ const Game = {
         this.cvs.style.width = (this.w * scale) + 'px';
         this.cvs.style.height = (this.h * scale) + 'px';
     },
+
+    updateJoystickCenter() {
+        const base = document.getElementById('joystick-base');
+        if (base) {
+            const rect = base.getBoundingClientRect();
+            if (rect.width > 0) {
+                this.joystickCenter = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            }
+        }
+    },
     
     setupJoystick() {
         const zone = document.getElementById('game-container');
         const stick = document.getElementById('joystick-stick');
-        const base = document.getElementById('joystick-base');
-
-        const getJoystickCenter = () => {
-            const rect = base.getBoundingClientRect();
-            return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-        };
 
         const handleMove = (e) => {
             if (!this.joystick.active) return;
@@ -979,9 +987,8 @@ const Game = {
                 clientY = e.clientY;
             }
 
-            const center = getJoystickCenter();
-            let dx = clientX - center.x;
-            let dy = clientY - center.y;
+            let dx = clientX - this.joystickCenter.x;
+            let dy = clientY - this.joystickCenter.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             let visualDx = dx, visualDy = dy;
@@ -992,6 +999,7 @@ const Game = {
                 dy = visualDy;
             }
 
+            // Move the stick visually
             stick.style.transform = `translate(calc(-50% + ${visualDx}px), calc(-50% + ${visualDy}px))`;
             this.joystick.dx = dx;
             this.joystick.dy = dy;
@@ -1000,6 +1008,8 @@ const Game = {
         const handleStart = (e) => {
             if (e.target.closest('.hud') || e.target.closest('.fs-btn') || e.target.closest('.sound-btn') || e.target.closest('#overlay')) return;
             if (this.joystick.active) return;
+            
+            this.updateJoystickCenter(); // Recalculate precisely on touch start
             
             this.joystick.active = true;
             if (e.touches) this.joystick.id = e.changedTouches[0].identifier;
@@ -1079,6 +1089,8 @@ const Game = {
 
         this.lastBallX = this.ball.x;
         this.lastBallY = this.ball.y;
+        this.lastMx = 0;
+        this.lastMy = 0;
 
         if (myTeam === 'blue') {
             this.cvs.style.transform = 'rotate(180deg)';
@@ -1121,6 +1133,9 @@ const Game = {
         document.getElementById('overlay').style.display = 'none';
         UI.go('game');
         
+        // Ensure joystick is calibrated when switching to game view
+        setTimeout(() => this.updateJoystickCenter(), 100);
+
         this.lastTime = performance.now();
         this.animationFrameId = requestAnimationFrame((t) => this.loop(t));
     },
@@ -1155,11 +1170,14 @@ const Game = {
         let mx = 0, my = 0;
         if (this.joystick.dx !== 0 || this.joystick.dy !== 0) {
             const dist = Math.sqrt(this.joystick.dx**2 + this.joystick.dy**2);
-            const normalizedDist = Math.min(dist / this.joystick.maxRadius, 1);
-            const factor = Math.pow(normalizedDist, 1.3); 
-            
-            mx = (this.joystick.dx / dist) * factor;
-            my = (this.joystick.dy / dist) * factor;
+            // Implement Deadzone for stability
+            if (dist > 5) {
+                const normalizedDist = Math.min(dist / this.joystick.maxRadius, 1);
+                const factor = normalizedDist; 
+                
+                mx = (this.joystick.dx / dist) * factor;
+                my = (this.joystick.dy / dist) * factor;
+            }
 
             if (this.activePlayers[Net.myId] && this.activePlayers[Net.myId].team === 'blue') {
                 mx = -mx;
@@ -1167,14 +1185,25 @@ const Game = {
             }
         }
 
+        // Round inputs to 2 decimal places to prevent micro-jitter and network spam
+        mx = Math.round(mx * 100) / 100;
+        my = Math.round(my * 100) / 100;
+
         if(this.activePlayers[Net.myId]) {
             this.activePlayers[Net.myId].input = { mx, my };
         }
 
         if (!Net.isHost) {
-            Net.sendToHost('PLAYER_INPUT', { mx, my });
+            const now = Date.now();
+            // Send input to host only if it changed significantly or as a heartbeat every 50ms
+            if (mx !== this.lastMx || my !== this.lastMy || now - (this.lastInputTime || 0) > 50) {
+                Net.sendToHost('PLAYER_INPUT', { mx, my });
+                this.lastMx = mx;
+                this.lastMy = my;
+                this.lastInputTime = now;
+            }
             
-            const ballLerp = 1 - Math.pow(1 - 0.5, fps60);
+            const ballLerp = 1 - Math.pow(1 - 0.4, fps60);
             this.ball.x += (this.ball.targetX - this.ball.x) * ballLerp;
             this.ball.y += (this.ball.targetY - this.ball.y) * ballLerp;
 
@@ -1313,7 +1342,8 @@ const Game = {
         }
 
         const now = Date.now();
-        if (now - this.lastSyncTime > 1000/60) {
+        // Slightly faster sync rate to keep clients extremely smooth
+        if (now - this.lastSyncTime > 40) {
             const state = {
                 b: { x: this.ball.x, y: this.ball.y },
                 p: {}
@@ -1418,9 +1448,8 @@ const Game = {
         c.save();
         c.translate(this.ball.x, this.ball.y);
         
-        c.shadowColor = 'rgba(0,0,0,0.4)';
-        c.shadowBlur = 10;
-        c.shadowOffsetY = 6;
+        c.fillStyle = 'rgba(0,0,0,0.3)';
+        c.beginPath(); c.arc(0, 6, this.ball.r, 0, Math.PI*2); c.fill();
         
         const bGrad = c.createRadialGradient(-10, -10, 5, 0, 0, this.ball.r);
         bGrad.addColorStop(0, '#795548');
@@ -1428,8 +1457,6 @@ const Game = {
         c.fillStyle = bGrad;
         
         c.beginPath(); c.arc(0,0,this.ball.r,0,Math.PI*2); c.fill();
-        
-        c.shadowColor = 'transparent'; c.shadowBlur = 0;
         
         c.strokeStyle = 'rgba(0,0,0,0.5)';
         c.lineWidth = 3;
@@ -1447,18 +1474,15 @@ const Game = {
             c.save();
             c.translate(p.x, p.y);
             
-            c.shadowColor = 'rgba(0,0,0,0.3)';
-            c.shadowBlur = 12;
-            c.shadowOffsetY = 8;
-            
             if (isMe) {
                 c.beginPath();
                 c.arc(0, 0, p.r + 12, 0, Math.PI * 2);
                 c.fillStyle = p.team === 'red' ? 'rgba(229, 57, 53, 0.15)' : 'rgba(30, 136, 229, 0.15)';
-                c.shadowColor = 'transparent';
                 c.fill();
-                c.shadowColor = 'rgba(0,0,0,0.3)';
             }
+
+            c.fillStyle = 'rgba(0,0,0,0.3)';
+            c.beginPath(); c.arc(0, 8, p.r, 0, Math.PI*2); c.fill();
 
             const pGrad = c.createRadialGradient(-p.r/3, -p.r/3, p.r/5, 0, 0, p.r);
             if (p.team === 'red') {
@@ -1471,8 +1495,6 @@ const Game = {
             
             c.fillStyle = pGrad;
             c.beginPath(); c.arc(0,0,p.r,0,Math.PI*2); c.fill();
-            
-            c.shadowColor = 'transparent'; c.shadowBlur = 0; 
             
             c.strokeStyle = '#1a0b08';
             c.lineWidth = isMe ? 5 : 3;
@@ -1565,7 +1587,6 @@ document.getElementById('btn-start').onclick = () => {
 AudioSystem.init();
 Game.init();
 
-// Handle Welcome Popup Click Event
 document.getElementById('btn-welcome-ok').onclick = () => {
     document.getElementById('welcome-dialog').style.display = 'none';
 };
