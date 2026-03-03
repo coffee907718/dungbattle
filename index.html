@@ -699,13 +699,16 @@ const Net = {
     myName: '',
     players: {}, 
     maxScore: 5,
+    ROOM_PREFIX: "DUNGBTL-",
     
     cfg: {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:global.stun.twilio.com:3478' }
+            { urls: 'stun:global.stun.twilio.com:3478' },
+            { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+            { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
         ]
     },
 
@@ -713,12 +716,12 @@ const Net = {
         this.isHost = isHost;
         this.myName = document.getElementById('input-name').value.trim() || (isHost ? "Host" : `Player_${Math.floor(Math.random()*100)}`);
         
-        const peerId = isHost ? roomId : `GUEST-${Math.floor(Math.random() * 9999999)}`;
+        const peerId = isHost ? (this.ROOM_PREFIX + roomId) : `GUEST-${Math.floor(Math.random() * 9999999)}`;
         this.peer = new Peer(peerId, { config: this.cfg });
 
         this.peer.on('open', (id) => {
             this.myId = id;
-            this.room = isHost ? id : roomId; 
+            this.room = roomId; 
             
             UI.go('lobby');
             document.getElementById('display-room-id').innerText = this.room;
@@ -732,7 +735,7 @@ const Net = {
                 this.updateLobbyUI();
             } else {
                 document.getElementById('lobby-status').innerText = "Connecting to host...";
-                this.connectToHost(roomId);
+                this.connectToHost(this.ROOM_PREFIX + roomId);
             }
         });
 
@@ -999,7 +1002,6 @@ const Game = {
                 dy = visualDy;
             }
 
-            // Move the stick visually
             stick.style.transform = `translate(calc(-50% + ${visualDx}px), calc(-50% + ${visualDy}px))`;
             this.joystick.dx = dx;
             this.joystick.dy = dy;
@@ -1009,7 +1011,7 @@ const Game = {
             if (e.target.closest('.hud') || e.target.closest('.fs-btn') || e.target.closest('.sound-btn') || e.target.closest('#overlay')) return;
             if (this.joystick.active) return;
             
-            this.updateJoystickCenter(); // Recalculate precisely on touch start
+            this.updateJoystickCenter(); 
             
             this.joystick.active = true;
             if (e.touches) this.joystick.id = e.changedTouches[0].identifier;
@@ -1133,7 +1135,6 @@ const Game = {
         document.getElementById('overlay').style.display = 'none';
         UI.go('game');
         
-        // Ensure joystick is calibrated when switching to game view
         setTimeout(() => this.updateJoystickCenter(), 100);
 
         this.lastTime = performance.now();
@@ -1170,7 +1171,6 @@ const Game = {
         let mx = 0, my = 0;
         if (this.joystick.dx !== 0 || this.joystick.dy !== 0) {
             const dist = Math.sqrt(this.joystick.dx**2 + this.joystick.dy**2);
-            // Implement Deadzone for stability
             if (dist > 5) {
                 const normalizedDist = Math.min(dist / this.joystick.maxRadius, 1);
                 const factor = normalizedDist; 
@@ -1185,7 +1185,6 @@ const Game = {
             }
         }
 
-        // Round inputs to 2 decimal places to prevent micro-jitter and network spam
         mx = Math.round(mx * 100) / 100;
         my = Math.round(my * 100) / 100;
 
@@ -1195,7 +1194,6 @@ const Game = {
 
         if (!Net.isHost) {
             const now = Date.now();
-            // Send input to host only if it changed significantly or as a heartbeat every 50ms
             if (mx !== this.lastMx || my !== this.lastMy || now - (this.lastInputTime || 0) > 50) {
                 Net.sendToHost('PLAYER_INPUT', { mx, my });
                 this.lastMx = mx;
@@ -1342,7 +1340,6 @@ const Game = {
         }
 
         const now = Date.now();
-        // Slightly faster sync rate to keep clients extremely smooth
         if (now - this.lastSyncTime > 40) {
             const state = {
                 b: { x: this.ball.x, y: this.ball.y },
