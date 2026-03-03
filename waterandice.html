@@ -623,10 +623,28 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
 
-        /* Status UI */
+        /* Status UI & Top Elements */
+        #timerBarContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: none;
+        }
+        
+        #timerBar {
+            height: 100%;
+            width: 100%;
+            background: var(--frozen-color);
+            transition: width 0.1s linear, background-color 0.3s ease;
+        }
+
         #statusUI {
             position: absolute;
-            top: 20px; 
+            top: 25px; 
             left: 50%;
             transform: translateX(-50%);
             background: rgba(51, 40, 34, 0.8);
@@ -649,6 +667,32 @@
         .dot.active-dot { background-color: var(--active-color); }
         .dot.frozen-dot { background-color: var(--frozen-color); }
         .dot.denner-dot { background-color: var(--freezer-color); }
+
+        /* Dash Button */
+        #dashBtn {
+            display: none;
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: var(--freezer-color);
+            border: 2px solid var(--border-color);
+            color: var(--bg-color);
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            font-weight: 800;
+            box-shadow: var(--shadow-lg);
+            z-index: 60;
+            user-select: none;
+            transition: transform 0.1s ease, opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        #dashBtn:active {
+            transform: scale(0.9);
+        }
 
         /* Toast Messages */
         #statusMessage {
@@ -784,6 +828,16 @@
 
             <div id="hostControls" style="display:none; margin-top: 10px;">
                 <div class="setting-group" style="padding: 12px; margin-bottom: 15px;">
+                    <label for="timeLimit" style="margin-bottom: 5px;">Time Limit</label>
+                    <select id="timeLimit">
+                        <option value="120">2 Minutes</option>
+                        <option value="240">4 Minutes</option>
+                        <option value="360">6 Minutes</option>
+                        <option value="480">8 Minutes</option>
+                        <option value="600">10 Minutes</option>
+                    </select>
+                </div>
+                <div class="setting-group" style="padding: 12px; margin-bottom: 15px;">
                     <label for="dennerCount" style="margin-bottom: 5px;">Auto-Assign Catchers</label>
                     <select id="dennerCount" onchange="handleDennerChange()">
                         <option value="1">1 Catcher</option>
@@ -815,6 +869,9 @@
     </div>
 
     <div id="gameScreen" class="screen">
+        <div id="timerBarContainer">
+            <div id="timerBar"></div>
+        </div>
         <div id="statusUI">
             <div class="status-pill"><span class="dot active-dot"></span> <span id="activeCount">0</span> Run</div>
             <div class="status-pill"><span class="dot frozen-dot"></span> <span id="frozenCount">0</span> Ice</div>
@@ -823,6 +880,10 @@
         <div id="joystick-zone"></div>
         <div class="joystick-base" id="jBase"><div class="joystick-stick" id="jStick"></div></div>
         <canvas id="gameCanvas"></canvas>
+        
+        <div id="dashBtn">
+            <span id="dashBtnText">⚡</span>
+        </div>
         
         <div id="gameOverUI" class="overlay-popup">
             <div class="card" style="padding: 40px 30px;">
@@ -933,13 +994,16 @@
         let myId = null;
         let myName = "";
         let connectionTimeout;
+        let lastPhysicsTime = 0;
         
         let gameState = {
             status: 'lobby', 
             players: {},
             mapLayout: [],
             winner: null,
-            mapSeed: Math.random()
+            mapSeed: Math.random(),
+            timeRemaining: 0,
+            totalTime: 0
         };
 
         const mapBubbles = [];
@@ -951,8 +1015,7 @@
         const ctx = canvas.getContext('2d');
         let width, height;
         let lastBroadcastTime = 0;
-        // Increased broadcast rate to 60fps for ultra-smooth host sync
-         const BROADCAST_INTERVAL = 1000 / 20; // 20 updates per second
+        const BROADCAST_INTERVAL = 1000 / 20;
 
         const previewCanvas = document.getElementById('mapPreviewCanvas');
         const pCtx = previewCanvas.getContext('2d');
@@ -995,20 +1058,13 @@
             buildLocalMapFromState();
             updatePreviewCanvas();
             connections.forEach(c => {
-    if (!c.open) return;
-
-    if (gameState.status === 'playing') {
-        c.send({
-            type: 'movementUpdate',
-            players: gameState.players
-        });
-    } else {
-        c.send({
-            type: 'stateUpdate',
-            state: gameState
-        });
-    }
-});
+                if (!c.open) return;
+                if (gameState.status === 'playing') {
+                    c.send({ type: 'movementUpdate', players: gameState.players });
+                } else {
+                    c.send({ type: 'stateUpdate', state: gameState });
+                }
+            });
         }
 
         function buildLocalMapFromState() {
@@ -1170,6 +1226,11 @@
                             gameState.players[connection.peer].vx = data.vx;
                             gameState.players[connection.peer].vy = data.vy;
                         }
+                    } else if (data.type === 'dash') {
+                        if (gameState.players[connection.peer] && gameState.players[connection.peer].isFreezer && (gameState.players[connection.peer].dashCooldown || 0) <= 0) {
+                            gameState.players[connection.peer].dashActive = 2.0;
+                            gameState.players[connection.peer].dashCooldown = 15.0;
+                        }
                     }
                 });
 
@@ -1227,14 +1288,14 @@
                 });
 
                 conn.on('data', (data) => {
-                  if (data.type === 'movementUpdate') {
-    for (let id in data.players) {
-        if (!gameState.players[id]) continue;
-        gameState.players[id].targetX = data.players[id].x;
-        gameState.players[id].targetY = data.players[id].y;
-    }
-    return;
-}
+                    if (data.type === 'movementUpdate') {
+                        for (let id in data.players) {
+                            if (!gameState.players[id]) continue;
+                            gameState.players[id].targetX = data.players[id].x;
+                            gameState.players[id].targetY = data.players[id].y;
+                        }
+                        return;
+                    }
                     if (data.type === 'stateUpdate') {
                         let oldStatus = gameState.status;
                         
@@ -1247,6 +1308,8 @@
                         gameState.mapSeed = data.state.mapSeed;
                         gameState.mapLayout = data.state.mapLayout;
                         gameState.winner = data.state.winner;
+                        gameState.timeRemaining = data.state.timeRemaining;
+                        gameState.totalTime = data.state.totalTime;
 
                         for (let id in data.state.players) {
                             let incomingP = data.state.players[id];
@@ -1257,6 +1320,8 @@
                                 gameState.players[id].isFreezer = incomingP.isFreezer;
                                 gameState.players[id].cooldown = incomingP.cooldown;
                                 gameState.players[id].name = incomingP.name;
+                                gameState.players[id].dashCooldown = incomingP.dashCooldown;
+                                gameState.players[id].dashActive = incomingP.dashActive;
                                 
                                 if (id === myId) {
                                     let dx = incomingP.x - gameState.players[myId].x;
@@ -1313,7 +1378,7 @@
                 targetX: 0, targetY: 0,
                 name: name,
                 isFrozen: false, isFreezer: false, 
-                radius: 20, cooldown: 0
+                radius: 20, cooldown: 0, dashCooldown: 0, dashActive: 0
             };
         }
 
@@ -1480,6 +1545,9 @@
             
             gameState.status = 'startSequence';
             gameState.winner = null;
+            gameState.totalTime = parseInt(document.getElementById('timeLimit').value) || 120;
+            gameState.timeRemaining = gameState.totalTime;
+            lastPhysicsTime = Date.now();
 
             joyActive = false;
             activeTouchId = null;
@@ -1492,6 +1560,8 @@
                 p.isFrozen = false;
                 p.cooldown = 180; 
                 p.vx = 0; p.vy = 0;
+                p.dashCooldown = 0;
+                p.dashActive = 0;
                 
                 let pos = getSafeSpawnPoint(pIds, id);
                 p.x = pos.x; p.y = pos.y;
@@ -1511,6 +1581,7 @@
             document.getElementById('playersOverlay').style.display = 'none';
             document.getElementById('gameOverUI').classList.remove('active');
             document.getElementById('gameOverUI').style.display = 'none';
+            document.getElementById('timerBarContainer').style.display = 'none';
 
             joyActive = false;
             activeTouchId = null;
@@ -1547,9 +1618,11 @@
                         cdUI.style.display = 'none';
                         if(isHost) {
                             gameState.status = 'playing';
+                            lastPhysicsTime = Date.now();
                             forceBroadcastState();
                         }
                         startSequenceActive = false;
+                        document.getElementById('timerBarContainer').style.display = 'block';
                     }
                 }, 1000);
             }, 3500);
@@ -1559,6 +1632,7 @@
         function showGameOver(winner) {
             joyActive = false;
             document.getElementById('jBase').style.display = 'none';
+            document.getElementById('timerBarContainer').style.display = 'none';
             inputVector = { x: 0, y: 0 };
             triggerHaptic('start');
 
@@ -1572,7 +1646,11 @@
             } else {
                 title.innerText = "Runners Win!";
                 title.className = "win-runners";
-                subtitle.innerText = "Runners successfully survived.";
+                if (gameState.timeRemaining <= 0) {
+                    subtitle.innerText = "Time's up! Runners survived.";
+                } else {
+                    subtitle.innerText = "Runners successfully survived.";
+                }
             }
 
             let active = 0, frozen = 0, catchers = 0;
@@ -1599,6 +1677,7 @@
             
             document.getElementById('playersPopup').style.display = 'none';
             document.getElementById('playersOverlay').style.display = 'none';
+            document.getElementById('timerBarContainer').style.display = 'none';
             startSequenceActive = false;
 
             updateLobbyUI();
@@ -1614,6 +1693,8 @@
                     gameState.players[id].cooldown = 0;
                     gameState.players[id].vx = 0;
                     gameState.players[id].vy = 0;
+                    gameState.players[id].dashCooldown = 0;
+                    gameState.players[id].dashActive = 0;
                 }
                 forceBroadcastState();
                 resetToLobbyUI();
@@ -1626,7 +1707,7 @@
             window.location.reload();
         }
 
-        // --- Joystick Logic ---
+        // --- Inputs ---
         const zone = document.getElementById('joystick-zone');
         const jBase = document.getElementById('jBase');
         const jStick = document.getElementById('jStick');
@@ -1724,7 +1805,6 @@
                 }
             } else if (conn && conn.open) {
                 conn.send({ type: 'input', vx: inputVector.x, vy: inputVector.y });
-                // Optimistic local update
                 if (gameState.players[myId] && !gameState.players[myId].isFrozen && gameState.status === 'playing') {
                      gameState.players[myId].vx = inputVector.x;
                      gameState.players[myId].vy = inputVector.y;
@@ -1732,21 +1812,54 @@
             }
         }
 
+        function handleDash(e) {
+            if (e) e.preventDefault();
+            if (gameState.status !== 'playing' || !gameState.players[myId] || !gameState.players[myId].isFreezer) return;
+            if ((gameState.players[myId].dashCooldown || 0) > 0) return;
+            
+            triggerHaptic('start');
+            if (isHost) {
+                gameState.players[myId].dashActive = 2.0;
+                gameState.players[myId].dashCooldown = 15.0;
+            } else if (conn && conn.open) {
+                conn.send({ type: 'dash' });
+                gameState.players[myId].dashActive = 2.0;
+                gameState.players[myId].dashCooldown = 15.0;
+            }
+        }
+
+        document.getElementById('dashBtn').addEventListener('touchstart', handleDash, {passive: false});
+        document.getElementById('dashBtn').addEventListener('mousedown', handleDash);
+
         // --- Physics & Collision (Host) ---
         const SPEED = 4.0;
         
         function updatePhysics() {
             if (gameState.status !== 'playing') return;
 
+            let now = Date.now();
+            let dt = (now - (lastPhysicsTime || now)) / 1000;
+            if (dt > 0.1) dt = 0.1; 
+            lastPhysicsTime = now;
+
+            if (gameState.timeRemaining > 0) {
+                gameState.timeRemaining -= dt;
+            }
+
             let pIds = Object.keys(gameState.players);
             
             for (let id of pIds) {
                 let p = gameState.players[id];
                 if (p.cooldown > 0) p.cooldown--;
+                if ((p.dashCooldown || 0) > 0) p.dashCooldown -= dt;
+                if ((p.dashActive || 0) > 0) p.dashActive -= dt;
 
                 if (!p.isFrozen) {
-                    p.x += p.vx * SPEED * 0.9;
-p.y += p.vy * SPEED * 0.9;
+                    let currentSpeed = SPEED;
+                    if (p.dashActive > 0) currentSpeed = SPEED * 1.8;
+
+                    p.x += p.vx * currentSpeed * 0.9;
+                    p.y += p.vy * currentSpeed * 0.9;
                     p.x = Math.max(p.radius, Math.min(width - p.radius, p.x));
                     p.y = Math.max(p.radius, Math.min(height - p.radius, p.y));
 
@@ -1816,6 +1929,11 @@ p.y += p.vy * SPEED * 0.9;
                 gameState.winner = 'catchers';
                 forceBroadcastState();
                 showGameOver('catchers');
+            } else if (gameState.timeRemaining <= 0) {
+                gameState.status = 'gameOver';
+                gameState.winner = 'runners';
+                forceBroadcastState();
+                showGameOver('runners');
             } else {
                 broadcastState(); 
             }
@@ -1838,10 +1956,11 @@ p.y += p.vy * SPEED * 0.9;
                 let p = gameState.players[id];
                 
                 if (id === myId) {
-                    // Local player uses immediate physics prediction
                     if (!p.isFrozen && p.vx !== undefined && p.vy !== undefined) {
-                        p.x += p.vx * SPEED;
-                        p.y += p.vy * SPEED;
+                        let currentSpeed = SPEED;
+                        if (p.dashActive > 0) currentSpeed = SPEED * 1.8;
+                        p.x += p.vx * currentSpeed;
+                        p.y += p.vy * currentSpeed;
                         p.x = Math.max(p.radius, Math.min(width - p.radius, p.x));
                         p.y = Math.max(p.radius, Math.min(height - p.radius, p.y));
                     }
@@ -1849,8 +1968,6 @@ p.y += p.vy * SPEED * 0.9;
                 }
                 
                 if (p.targetX !== undefined && p.targetY !== undefined) {
-                    // Remove aggressive local extrapolation of the target to prevent "rubber-banding" stutters
-                    // Simply use a pure smooth lerp towards the authoritative server position.
                     p.x += (p.targetX - p.x) * 0.3;
                     p.y += (p.targetY - p.y) * 0.3;
                 }
@@ -1997,6 +2114,11 @@ p.y += p.vy * SPEED * 0.9;
                 }
             }
             
+            if (p.dashActive > 0) {
+                ctx.beginPath(); ctx.arc(0, 0, p.radius * 1.3, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 2; ctx.stroke();
+            }
+            
             ctx.restore();
 
             ctx.font = '800 14px "Roboto Slab", serif';
@@ -2011,6 +2133,41 @@ p.y += p.vy * SPEED * 0.9;
             ctx.fillText(p.name, p.x, tagY);
         }
 
+        function updateClientUI() {
+            if (gameState.status === 'playing' && gameState.totalTime > 0) {
+                let pct = (gameState.timeRemaining / gameState.totalTime) * 100;
+                let tBar = document.getElementById('timerBar');
+                tBar.style.width = Math.max(0, pct) + '%';
+                
+                if (gameState.timeRemaining <= 15) {
+                    tBar.style.backgroundColor = 'var(--freezer-color)';
+                } else {
+                    tBar.style.backgroundColor = 'var(--frozen-color)';
+                }
+
+                if (gameState.players[myId]) {
+                    let me = gameState.players[myId];
+                    let dBtn = document.getElementById('dashBtn');
+                    let dBtnText = document.getElementById('dashBtnText');
+                    
+                    if (me.isFreezer) {
+                        dBtn.style.display = 'flex';
+                        if ((me.dashCooldown || 0) > 0) {
+                            dBtn.style.opacity = '0.5';
+                            dBtn.style.filter = 'grayscale(100%)';
+                            dBtnText.innerText = Math.ceil(me.dashCooldown);
+                        } else {
+                            dBtn.style.opacity = '1';
+                            dBtn.style.filter = 'none';
+                            dBtnText.innerText = '⚡';
+                        }
+                    } else {
+                        dBtn.style.display = 'none';
+                    }
+                }
+            }
+        }
+
         function gameLoop() {
             if (isHost) {
                 updatePhysics();
@@ -2021,7 +2178,10 @@ p.y += p.vy * SPEED * 0.9;
             updateBubbles(); 
             checkHapticState();
             
-            if (!isHost && gameState.status === 'playing') updateUIStats();
+            if (gameState.status === 'playing') {
+                if (!isHost) updateUIStats();
+                updateClientUI();
+            }
 
             if (document.getElementById('gameScreen').classList.contains('active')) {
                 ctx.clearRect(0, 0, width, height);
