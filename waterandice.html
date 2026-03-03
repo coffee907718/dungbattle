@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=portrait">
+    <title>Freeze Tag Arena - Dark Edition</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            /* Premium Dark Brown Theme */
+            --bg-color: #1a1412;       /* Deepest warm dark brown */
+            --game-bg: #241d19;        /* Slightly lighter for arena */
+            --surface-color: #332822;  /* Surface elements */
+            --text-main: #e8dbd1;      /* Crisp off-white/cream for readability */
+            --text-muted: #ab9b8e;     /* Subdued text */
+            --primary: #c99a6c;        /* Classic elegant tan/gold */
+            --primary-hover: #b0855c;
+            
+            /* Game Colors - Clean, No Neon/Glow */
+            --frozen-color: #4da6ff;   
+            --freezer-color: #e63946;  
+            --active-color: #2a9d8f;   
+            
+            --border-color: #524036;   
+            --grid-color: rgba(201, 154, 108, 0.08); 
+            
+            --transition-speed: 0.3s;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-color);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-speed) ease-in-out;
+        }
+        .screen.active { 
+            opacity: 1; 
+            pointer-events: all; 
+        }
+
+        #gameScreen { 
+            background: var(--game-bg); 
+            z-index: 1; 
+        }
+
+        /* Top Action Buttons */
+        .top-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .icon-btn svg { fill: var(--primary); width: 20px; height: 20px; }
+        .icon-btn:active { transform: scale(0.9); }
+        
+        /* UI Elements */
+        .card {
+            background: var(--surface-color);
+            padding: 35px 30px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 { 
+            margin-bottom: 8px; 
+            font-size: 32px; 
+            font-weight: 800;
+            color: var(--primary); 
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .room-title-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--border-color);
+            width: 100%;
+        }
+
+        h2 { 
+            font-size: 22px; 
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .inline-copy-btn {
+            background: rgba(201, 154, 108, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .inline-copy-btn:active { transform: scale(0.9); background: var(--primary); }
+        .inline-copy-btn:active svg { fill: var(--bg-color); }
+        .inline-copy-btn svg { fill: var(--primary); width: 18px; height: 18px; transition: fill 0.2s; }
+
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--bg-color);
+            color: var(--text-main);
+            font-size: 16px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(201, 154, 108, 0.1);
+        }
+
+        .setting-group {
+            text-align: left;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.2);
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .setting-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .setting-group select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--surface-color);
+            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+        }
+
+        .setting-group select:focus {
+            border-color: var(--primary);
+        }
+
+        button.main-btn {
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 14px;
+            background: var(--primary);
+            color: var(--bg-color);
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button.main-btn:active { 
+            transform: translateY(2px); 
+            box-shadow: var(--shadow-sm);
+        }
+
+        button.outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            box-shadow: none;
+        }
+
+        button.outline:active {
+            background: rgba(201, 154, 108, 0.1);
+        }
+
+        .divider {
+            margin: 20px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+        }
+        
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+            margin: 0 15px;
+        }
+
+        /* Lobby Header & Player Button */
+        .lobby-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .lobby-header h3 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .players-btn {
+            background: rgba(201, 154, 108, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .players-btn:active {
+            transform: scale(0.95);
+            background: var(--primary);
+            color: var(--bg-color);
+        }
+
+        /* Player List Popup */
+        #playersPopup {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface-color);
+            padding: 25px;
+            border-radius: 24px;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            width: 85%;
+            max-width: 350px;
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .popup-header h3 {
+            color: var(--primary);
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .player-list {
+            list-style: none;
+            margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            padding: 5px;
+        }
+        
+        .player-list li {
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .host-view .player-list li {
+            cursor: pointer;
+        }
+        .host-view .player-list li:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+
+        .you-tag {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 800;
+            background: rgba(201, 154, 108, 0.1);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .role-badge {
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+        }
+
+        .role-badge.denner {
+            background: rgba(230, 57, 70, 0.15);
+            color: var(--freezer-color);
+            border: 1px solid rgba(230, 57, 70, 0.3);
+        }
+
+        .role-badge.runner {
+            background: rgba(42, 157, 143, 0.15);
+            color: var(--active-color);
+            border: 1px solid rgba(42, 157, 143, 0.3);
+        }
+
+        #clientInfo {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            border: 2px dashed var(--border-color);
+        }
+
+        .hint-text {
+            font-size: 13px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-weight: 600;
+            background: rgba(201, 154, 108, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        /* Map Preview Canvas */
+        #mapPreviewCanvas {
+            width: 100%;
+            height: 160px;
+            background: var(--game-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Overlays & Popups */
+        .overlay-bg {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(26, 20, 18, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 140;
+            display: none;
+        }
+
+        #popup, #countdownUI {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface-color);
+            padding: 35px;
+            border-radius: 24px;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            z-index: 150;
+            display: none;
+            width: 85%;
+            max-width: 350px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -45%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        #popup h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        #popup p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        #countdownUI { 
+            font-size: 80px; 
+            font-weight: 900; 
+            color: var(--primary); 
+            background: transparent; 
+            box-shadow: none; 
+            border: none;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        /* Game Over Overlay */
+        .overlay-popup {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(26, 20, 18, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .overlay-popup.active { opacity: 1; display: flex; }
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; font-weight: 600; color: var(--text-main);
+            padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .stat-row strong { font-weight: 800; color: var(--primary); font-size: 16px; }
+        .win-catchers { color: var(--freezer-color) !important; }
+        .win-runners { color: var(--active-color) !important; }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Joystick */
+        #joystick-zone {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 5;
+            touch-action: none;
+        }
+        
+        .joystick-base {
+            position: absolute;
+            width: 100px; height: 100px;
+            background: rgba(51, 40, 34, 0.6);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        
+        .joystick-stick {
+            position: absolute;
+            width: 40px; height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Status UI */
+        #statusUI {
+            position: absolute;
+            top: 20px; 
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(51, 40, 34, 0.8);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            font-size: 13px;
+            font-weight: 800;
+            z-index: 50;
+            display: flex;
+            gap: 15px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            white-space: nowrap;
+        }
+
+        .status-pill { display: flex; align-items: center; gap: 6px; color: var(--text-main); }
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .dot.active-dot { background-color: var(--active-color); }
+        .dot.frozen-dot { background-color: var(--frozen-color); }
+        .dot.denner-dot { background-color: var(--freezer-color); }
+
+        /* Toast Messages */
+        #statusMessage {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: var(--bg-color);
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+            pointer-events: none;
+            box-shadow: var(--shadow-lg);
+            animation: slideUpToast 0.3s ease;
+        }
+
+        @keyframes slideUpToast {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-actions">
+        <div id="fsBtn" class="icon-btn" title="Toggle Fullscreen">
+            <svg viewBox="0 0 24 24">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        </div>
+    </div>
+
+    <div id="menuScreen" class="screen active">
+        <div class="card">
+            <h1>Freeze Tag</h1>
+            <p class="subtitle">Arena Multiplayer</p>
+            
+            <input type="text" id="playerName" placeholder="Enter your name" maxlength="12" autocomplete="off">
+            <button class="main-btn" onclick="createRoom()">Create New Room</button>
+            
+            <div class="divider">or join existing</div>
+            
+            <input type="tel" id="roomCode" placeholder="Enter 6-Digit Room ID" maxlength="6" autocomplete="off">
+            <button class="main-btn outline" onclick="joinRoom()">Join Room</button>
+        </div>
+    </div>
+
+    <div id="lobbyScreen" class="screen">
+        <div class="card" style="padding: 25px; overflow-y: auto;" id="lobbyCard">
+            <div class="room-title-container">
+                <h2>Room ID: <span id="displayRoomId" style="color: var(--primary); margin-left: 6px;"></span>
+                    <button id="copyBtn" class="inline-copy-btn" onclick="copyRoomId()" title="Copy Room ID">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                    </button>
+                </h2>
+            </div>
+            
+            <div class="lobby-header">
+                <h3>Lobby</h3>
+                <button class="players-btn" onclick="togglePlayersPopup()">
+                    👥 Players <span class="player-count-badge" id="lobbyPlayerCountBadge">0</span>
+                </button>
+            </div>
+            
+            <div class="setting-group" id="mapPreviewSection" style="display:none; padding: 12px; margin-bottom: 15px;">
+                <label style="display: flex; justify-content: space-between; align-items: center;">
+                    Arena Map
+                    <span id="editHint" style="display:none; font-size:10px; color:var(--primary); text-transform:none;">Tap canvas to add/remove</span>
+                </label>
+                <canvas id="mapPreviewCanvas"></canvas>
+                <div id="mapControls" style="display:flex; gap: 10px; margin-top: 10px;">
+                    <button class="main-btn outline" onclick="generateRandomMap()" style="margin:0; padding: 10px; font-size: 13px; flex:1;">🎲 Random</button>
+                    <button class="main-btn outline" onclick="toggleMapEditMode()" id="editMapBtn" style="margin:0; padding: 10px; font-size: 13px; flex:1;">✏️ Edit</button>
+                </div>
+            </div>
+
+            <div id="hostControls" style="display:none; margin-top: 10px;">
+                <div class="setting-group" style="padding: 12px; margin-bottom: 15px;">
+                    <label for="dennerCount" style="margin-bottom: 5px;">Auto-Assign Catchers</label>
+                    <select id="dennerCount" onchange="handleDennerChange()">
+                        <option value="1">1 Catcher</option>
+                        <option value="2">2 Catchers</option>
+                        <option value="3">3 Catchers</option>
+                    </select>
+                </div>
+                <button class="main-btn" id="startGameBtn" onclick="startSequence()" style="margin: 0;">Start Match</button>
+            </div>
+
+            <div id="clientInfo" style="display:none;">
+                <p style="font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 6px;">Waiting for Host...</p>
+                <p style="font-size: 14px; color: var(--text-muted); font-weight: 500;">Roles are assigned automatically.</p>
+            </div>
+            
+            <p id="waitingText" style="color: var(--text-muted); font-size: 15px; margin-top: 10px; font-weight: 600;">Connecting to server...</p>
+        </div>
+
+        <div class="overlay-bg" id="playersOverlay"></div>
+        <div id="playersPopup">
+            <div class="popup-header">
+                <h3>Players (<span id="popupPlayerCount">0</span>)</h3>
+                <button class="close-btn" onclick="togglePlayersPopup()">×</button>
+            </div>
+            <p id="hostHint" class="hint-text" style="display:none;">Tap a player to change their role</p>
+            <ul class="player-list" id="lobbyPlayers"></ul>
+            <button class="main-btn outline" onclick="togglePlayersPopup()" style="margin-top: 10px; padding: 12px;">Close</button>
+        </div>
+    </div>
+
+    <div id="gameScreen" class="screen">
+        <div id="statusUI">
+            <div class="status-pill"><span class="dot active-dot"></span> <span id="activeCount">0</span> Run</div>
+            <div class="status-pill"><span class="dot frozen-dot"></span> <span id="frozenCount">0</span> Ice</div>
+            <div class="status-pill"><span class="dot denner-dot"></span> <span id="dennerCountDisplay">0</span> Catch</div>
+        </div>
+        <div id="joystick-zone"></div>
+        <div class="joystick-base" id="jBase"><div class="joystick-stick" id="jStick"></div></div>
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="gameOverUI" class="overlay-popup">
+            <div class="card" style="padding: 40px 30px;">
+                <h1 id="goTitle">Game Over</h1>
+                <p id="goSubtitle" class="subtitle">Match Ended!</p>
+                
+                <div class="divider">Match Results</div>
+                
+                <div id="goStats" style="margin-bottom: 25px; text-align: left; width: 100%;"></div>
+                
+                <button class="main-btn" onclick="enterLobby()">Enter Lobby</button>
+                <button class="main-btn outline" onclick="exitGame()">Exit Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay-bg" id="howToPlayOverlay"></div>
+    <div id="popup">
+        <h3>How to Play</h3>
+        <p><strong>Catchers (Red):</strong> Touch green players to freeze them.<br><br><strong>Runners (Green):</strong> Avoid catchers! Touch frozen teammates (Blue) to unfreeze them. Survive!</p>
+    </div>
+    
+    <div id="countdownUI"></div>
+    <div id="statusMessage"></div>
+
+    <script>
+        // --- UI & Utility Functions ---
+        document.getElementById('fsBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        function showMessage(msg, duration = 3000) {
+            const el = document.getElementById('statusMessage');
+            el.innerText = msg;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, duration);
+        }
+
+        function copyRoomId() {
+            const id = document.getElementById('displayRoomId').innerText;
+            if(id) {
+                navigator.clipboard.writeText(id).then(() => {
+                    showMessage("Room ID Copied!");
+                    triggerHaptic('tap');
+                });
+            }
+        }
+
+        function triggerHaptic(type) {
+            if (!navigator.vibrate) return;
+            try {
+                if (type === 'tap') navigator.vibrate(15);
+                if (type === 'freeze') navigator.vibrate([60, 30, 60]);
+                if (type === 'unfreeze') navigator.vibrate([30]);
+                if (type === 'start') navigator.vibrate([80, 40, 80, 40, 150]);
+                if (type === 'bounce') navigator.vibrate([10]); 
+            } catch(e) {}
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            setTimeout(() => { document.getElementById(id).classList.add('active'); }, 10);
+        }
+
+        function togglePlayersPopup() {
+            triggerHaptic('tap');
+            const popup = document.getElementById('playersPopup');
+            const overlay = document.getElementById('playersOverlay');
+            if (popup.style.display === 'flex') {
+                popup.style.display = 'none';
+                overlay.style.display = 'none';
+            } else {
+                popup.style.display = 'flex';
+                overlay.style.display = 'block';
+            }
+        }
+
+        // Close popup when clicking overlay
+        document.getElementById('playersOverlay').addEventListener('click', () => {
+            document.getElementById('playersPopup').style.display = 'none';
+            document.getElementById('playersOverlay').style.display = 'none';
+        });
+
+        // --- State & Variables ---
+        let peer = null;
+        let conn = null; 
+        let connections = new Map();
+        let isHost = false;
+        let myId = null;
+        let myName = "";
+        
+        let gameState = {
+            status: 'lobby', 
+            players: {},
+            mapLayout: [],
+            winner: null,
+            mapSeed: Math.random()
+        };
+
+        const mapBubbles = [];
+        let localFrozenState = false;
+        let inputVector = { x: 0, y: 0 };
+        let startSequenceActive = false; // Prevent multiple starts
+        
+        // Canvas Setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let lastBroadcastTime = 0;
+        const BROADCAST_INTERVAL = 1000 / 30; // 30 FPS networking for smoothness
+
+        // Preview Canvas Setup
+        const previewCanvas = document.getElementById('mapPreviewCanvas');
+        const pCtx = previewCanvas.getContext('2d');
+        let isEditingMap = false;
+
+        function seededRandom(seed) {
+            let t = seed += 0x6D2B79F5;
+            t = Math.imul(t ^ t >>> 15, t | 1);
+            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        }
+
+        // --- Map Generation & Sync ---
+        function generateRandomMap() {
+            if (!isHost) return;
+            triggerHaptic('tap');
+            gameState.mapLayout = [];
+            gameState.mapSeed = Math.random(); 
+            
+            const cols = 5;
+            const rows = 6; 
+            const numBubbles = cols * rows;
+            let seed = gameState.mapSeed;
+            
+            for(let i = 0; i < numBubbles; i++) {
+                if (seededRandom(seed++) > 0.6) continue;
+
+                let c = i % cols;
+                let r = Math.floor(i / cols);
+                
+                let baseX = 0.1 + (c * 0.8 / (cols - 1));
+                let baseY = 0.1 + (r * 0.8 / (rows - 1));
+                
+                let x = baseX + (seededRandom(seed++) * 0.1 - 0.05);
+                let y = baseY + (seededRandom(seed++) * 0.1 - 0.05);
+                
+                let radiusPct = 0.05 + (seededRandom(seed++) * 0.04);
+                gameState.mapLayout.push({ xPct: x, yPct: y, rPct: radiusPct });
+            }
+            buildLocalMapFromState();
+            updatePreviewCanvas();
+            forceBroadcastState();
+        }
+
+        function buildLocalMapFromState() {
+            if (!gameState.mapLayout) return;
+            mapBubbles.length = 0;
+            
+            gameState.mapLayout.forEach((b, i) => {
+                let actualX = b.xPct * width;
+                let actualY = b.yPct * height;
+                let actualRadius = b.rPct * Math.min(width, height);
+
+                mapBubbles.push({
+                    id: 'b'+i, x: actualX, y: actualY,
+                    baseRadius: actualRadius, currentRadius: actualRadius, 
+                    springFactor: 0.1, damping: 0.8, vR: 0,
+                    wobbleOffset: (gameState.mapSeed + i) * Math.PI * 2 
+                });
+            });
+            updatePreviewCanvas();
+        }
+
+        function updatePreviewCanvas() {
+            if(!gameState.mapLayout) return;
+            
+            const rect = previewCanvas.getBoundingClientRect();
+            if(rect.width > 0) {
+                previewCanvas.width = rect.width;
+                previewCanvas.height = rect.height;
+            }
+
+            pCtx.clearRect(0,0, previewCanvas.width, previewCanvas.height);
+            pCtx.fillStyle = 'rgba(201, 154, 108, 0.2)'; 
+            pCtx.strokeStyle = 'rgba(201, 154, 108, 0.5)';
+            pCtx.lineWidth = 1;
+
+            gameState.mapLayout.forEach(b => {
+                pCtx.beginPath();
+                pCtx.arc(b.xPct * previewCanvas.width, b.yPct * previewCanvas.height, b.rPct * previewCanvas.width, 0, Math.PI*2);
+                pCtx.fill();
+                pCtx.stroke();
+            });
+        }
+
+        function toggleMapEditMode() {
+            if(!isHost) return;
+            triggerHaptic('tap');
+            isEditingMap = !isEditingMap;
+            document.getElementById('editHint').style.display = isEditingMap ? 'inline' : 'none';
+            document.getElementById('editMapBtn').style.background = isEditingMap ? 'var(--primary)' : 'transparent';
+            document.getElementById('editMapBtn').style.color = isEditingMap ? 'var(--bg-color)' : 'var(--primary)';
+        }
+
+        previewCanvas.addEventListener('mousedown', handleMapEdit);
+        previewCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleMapEdit(e.touches[0]); }, {passive: false});
+
+        function handleMapEdit(e) {
+            if(!isHost || !isEditingMap) return;
+            const rect = previewCanvas.getBoundingClientRect();
+            const xPct = (e.clientX - rect.left) / previewCanvas.width;
+            const yPct = (e.clientY - rect.top) / previewCanvas.height;
+            
+            let removed = false;
+            for(let i=gameState.mapLayout.length-1; i>=0; i--) {
+                let b = gameState.mapLayout[i];
+                let dist = Math.sqrt(Math.pow(xPct - b.xPct, 2) + Math.pow(yPct - b.yPct, 2));
+                if (dist < b.rPct * 1.5) { 
+                    gameState.mapLayout.splice(i, 1);
+                    removed = true;
+                    triggerHaptic('tap');
+                    break;
+                }
+            }
+            if (!removed) {
+                gameState.mapLayout.push({ xPct: xPct, yPct: yPct, rPct: 0.05 + Math.random()*0.03 });
+                triggerHaptic('bounce');
+            }
+            buildLocalMapFromState();
+            forceBroadcastState();
+        }
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            if (gameState.mapLayout && gameState.mapLayout.length > 0) {
+                buildLocalMapFromState();
+            }
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Networking (PeerJS) ---
+        function generateRoomId() {
+            return Math.floor(100000 + Math.random() * 900000).toString(); 
+        }
+
+        function createRoom() {
+            triggerHaptic('tap');
+            myName = document.getElementById('playerName').value.trim() || "Host";
+            const roomId = generateRoomId();
+            
+            peer = new Peer('wifb-' + roomId, {
+                config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }]}
+            });
+
+            peer.on('open', (id) => {
+                isHost = true;
+                myId = id;
+                document.getElementById('displayRoomId').innerText = roomId;
+                document.getElementById('playersPopup').classList.add('host-view');
+                document.getElementById('hostControls').style.display = 'block';
+                document.getElementById('hostHint').style.display = 'block';
+                document.getElementById('waitingText').style.display = 'none';
+                
+                document.getElementById('mapPreviewSection').style.display = 'block';
+                document.getElementById('mapControls').style.display = 'flex';
+                generateRandomMap(); 
+
+                addPlayerToState(myId, myName);
+                gameState.players[myId].isFreezer = true; 
+                
+                updateLobbyUI();
+                showScreen('lobbyScreen');
+            });
+
+            peer.on('connection', (connection) => {
+                connections.set(connection.peer, connection);
+                
+                connection.on('data', (data) => {
+                    if (data.type === 'join') {
+                        addPlayerToState(connection.peer, data.name);
+                        assignRolesInLobby(); 
+                        updateLobbyUI(); 
+                        forceBroadcastState();
+                        showMessage(`${data.name} joined`);
+                    } else if (data.type === 'input') {
+                        if (gameState.players[connection.peer] && !gameState.players[connection.peer].isFrozen && gameState.status === 'playing') {
+                            gameState.players[connection.peer].vx = data.vx;
+                            gameState.players[connection.peer].vy = data.vy;
+                        }
+                    }
+                });
+
+                connection.on('close', () => {
+                    let pName = gameState.players[connection.peer] ? gameState.players[connection.peer].name : "Someone";
+                    delete gameState.players[connection.peer];
+                    connections.delete(connection.peer);
+                    assignRolesInLobby(); 
+                    updateLobbyUI();
+                    forceBroadcastState();
+                    showMessage(`${pName} left`);
+                });
+            });
+            
+            peer.on('error', (err) => alert("Network Error. Try again."));
+        }
+
+        function joinRoom() {
+            triggerHaptic('tap');
+            myName = document.getElementById('playerName').value.trim() || "Player";
+            const roomId = document.getElementById('roomCode').value.trim();
+            if(roomId.length !== 6) return alert("Enter 6-digit Room ID");
+
+            peer = new Peer({
+                config: {'iceServers': [{ url: 'stun:stun.l.google.com:19302' }]}
+            });
+
+            peer.on('open', (id) => {
+                myId = id;
+                conn = peer.connect('wifb-' + roomId, { reliable: true });
+                
+                conn.on('open', () => {
+                    document.getElementById('displayRoomId').innerText = roomId;
+                    document.getElementById('clientInfo').style.display = 'block';
+                    document.getElementById('waitingText').style.display = 'none';
+                    
+                    document.getElementById('mapPreviewSection').style.display = 'block';
+                    document.getElementById('mapControls').style.display = 'none'; 
+
+                    conn.send({ type: 'join', name: myName });
+                    showScreen('lobbyScreen');
+                });
+
+                conn.on('data', (data) => {
+                    if (data.type === 'stateUpdate') {
+                        let oldStatus = gameState.status;
+                        
+                        let newMap = false;
+                        if (data.state.mapLayout && (!gameState.mapLayout || gameState.mapSeed !== data.state.mapSeed || gameState.mapLayout.length !== data.state.mapLayout.length)) {
+                            newMap = true;
+                        }
+                        
+                        gameState.status = data.state.status;
+                        gameState.mapSeed = data.state.mapSeed;
+                        gameState.mapLayout = data.state.mapLayout;
+                        gameState.winner = data.state.winner;
+
+                        for (let id in data.state.players) {
+                            let incomingP = data.state.players[id];
+                            if (!gameState.players[id]) {
+                                gameState.players[id] = incomingP;
+                            } else {
+                                gameState.players[id].isFrozen = incomingP.isFrozen;
+                                gameState.players[id].isFreezer = incomingP.isFreezer;
+                                gameState.players[id].cooldown = incomingP.cooldown;
+                                gameState.players[id].name = incomingP.name;
+                                
+                                if (id === myId) {
+                                    let dx = incomingP.x - gameState.players[myId].x;
+                                    let dy = incomingP.y - gameState.players[myId].y;
+                                    if (Math.sqrt(dx*dx + dy*dy) > 40) {
+                                        gameState.players[myId].x = incomingP.x;
+                                        gameState.players[myId].y = incomingP.y;
+                                    }
+                                } else {
+                                    gameState.players[id].targetX = incomingP.x;
+                                    gameState.players[id].targetY = incomingP.y;
+                                    gameState.players[id].vx = incomingP.vx;
+                                    gameState.players[id].vy = incomingP.vy;
+                                }
+                            }
+                        }
+
+                        for (let id in gameState.players) {
+                            if (!data.state.players[id]) delete gameState.players[id];
+                        }
+
+                        if (newMap) buildLocalMapFromState();
+                        
+                        if (gameState.status === 'lobby' && oldStatus !== 'lobby') {
+                            resetToLobbyUI();
+                        }
+                        else if (gameState.status === 'lobby') {
+                            updateLobbyUI();
+                        }
+                        
+                        if (gameState.status === 'startSequence' && oldStatus !== 'startSequence') {
+                            buildLocalMapFromState(); 
+                            triggerClientStart();
+                        }
+                        
+                        if (gameState.status === 'gameOver' && oldStatus !== 'gameOver') {
+                            showGameOver(gameState.winner);
+                        }
+                    }
+                });
+            });
+            
+            peer.on('error', (err) => alert("Could not join. Check ID."));
+        }
+
+        // --- Game Logic & Flow ---
+        function addPlayerToState(id, name) {
+            gameState.players[id] = {
+                x: 0, y: 0, vx: 0, vy: 0,
+                targetX: 0, targetY: 0,
+                name: name,
+                isFrozen: false, isFreezer: false, 
+                radius: 20, cooldown: 0
+            };
+        }
+
+        function toggleRole(playerId) {
+            if (!isHost) return;
+            triggerHaptic('tap');
+            gameState.players[playerId].isFreezer = !gameState.players[playerId].isFreezer;
+            updateLobbyUI();
+            forceBroadcastState();
+        }
+
+        function handleDennerChange() {
+            if (!isHost) return;
+            gameState.lobbySettings = { dennerCount: parseInt(document.getElementById('dennerCount').value) || 1 };
+            assignRolesInLobby();
+            updateLobbyUI(); 
+            forceBroadcastState(); 
+        }
+
+        function assignRolesInLobby() {
+            if (!isHost) return;
+            let pIds = Object.keys(gameState.players);
+            let desired = gameState.lobbySettings ? gameState.lobbySettings.dennerCount : 1;
+            let assigned = 0;
+            
+            pIds.forEach(id => gameState.players[id].isFreezer = false);
+            for(let id of pIds) {
+                if(assigned < desired) {
+                    gameState.players[id].isFreezer = true;
+                    assigned++;
+                }
+            }
+        }
+
+        function updateLobbyUI() {
+            const list = document.getElementById('lobbyPlayers');
+            const badge1 = document.getElementById('lobbyPlayerCountBadge');
+            const badge2 = document.getElementById('popupPlayerCount');
+            
+            let pIds = Object.keys(gameState.players);
+            let countStr = pIds.length.toString();
+            badge1.innerText = countStr;
+            badge2.innerText = countStr;
+            
+            Array.from(list.children).forEach(li => {
+                if (!pIds.includes(li.dataset.id)) {
+                    li.style.opacity = '0';
+                    setTimeout(() => li.remove(), 300);
+                }
+            });
+            
+            pIds.forEach(id => {
+                let p = gameState.players[id];
+                let li = list.querySelector(`li[data-id="${id}"]`);
+                
+                let roleClass = p.isFreezer ? "role-badge denner" : "role-badge runner";
+                let roleText = p.isFreezer ? "Catcher" : "Runner";
+                let roleHtml = `<span class="${roleClass}">${roleText}</span>`;
+                
+                let nameHtml = `<div class="player-info">
+                                    <span>${p.name}</span>
+                                    ${id === myId ? '<span class="you-tag">(You)</span>' : ''}
+                                </div>`;
+                
+                if (!li) {
+                    li = document.createElement('li');
+                    li.dataset.id = id;
+                    if (isHost) li.onclick = () => toggleRole(id);
+                    list.appendChild(li);
+                }
+                
+                li.innerHTML = `${nameHtml} ${roleHtml}`;
+                
+                if (id === myId) {
+                    li.style.borderColor = p.isFreezer ? 'var(--freezer-color)' : 'var(--active-color)';
+                    li.style.borderWidth = '2px';
+                } else {
+                    li.style.borderColor = 'var(--border-color)';
+                    li.style.borderWidth = '2px';
+                }
+            });
+        }
+
+        function forceBroadcastState() {
+            if (!isHost) return;
+            connections.forEach(c => {
+                if(c.open) c.send({ type: 'stateUpdate', state: gameState });
+            });
+            lastBroadcastTime = Date.now();
+        }
+
+        function broadcastState() {
+            if (!isHost) return;
+            let now = Date.now();
+            if (now - lastBroadcastTime > BROADCAST_INTERVAL) {
+                forceBroadcastState();
+            }
+            if (gameState.status === 'playing') updateUIStats();
+        }
+
+        function updateUIStats() {
+            let active = 0, frozen = 0, denners = 0;
+            for (let id in gameState.players) {
+                if(gameState.players[id].isFreezer) denners++;
+                else if(gameState.players[id].isFrozen) frozen++;
+                else active++;
+            }
+            document.getElementById('activeCount').innerText = active;
+            document.getElementById('frozenCount').innerText = frozen;
+            document.getElementById('dennerCountDisplay').innerText = denners;
+        }
+
+        function getSafeSpawnPoint(pIds, currentId) {
+            let safe = false, x, y, attempts = 0;
+            let radius = gameState.players[currentId].radius;
+
+            while (!safe && attempts < 200) {
+                safe = true;
+                x = Math.random() * (width - radius*4) + radius*2;
+                y = Math.random() * (height - radius*4) + radius*2;
+
+                if (gameState.players[currentId].isFreezer) {
+                    for (let obs of mapBubbles) {
+                        let dist = Math.sqrt(Math.pow(x - obs.x, 2) + Math.pow(y - obs.y, 2));
+                        if (dist < obs.baseRadius + radius + 15) safe = false;
+                    }
+                }
+                
+                if(safe) {
+                    for (let otherId of pIds) {
+                        if (otherId === currentId) continue;
+                        let other = gameState.players[otherId];
+                        if (other.spawned) {
+                            let dist = Math.sqrt(Math.pow(x - other.x, 2) + Math.pow(y - other.y, 2));
+                            if (dist < 100) safe = false; 
+                        }
+                    }
+                }
+                attempts++;
+            }
+            return {x, y};
+        }
+
+        function startSequence() {
+            if (!isHost || startSequenceActive) return;
+            triggerHaptic('tap');
+            
+            let hasCatcher = false, hasRunner = false;
+            for(let id in gameState.players) {
+                if(gameState.players[id].isFreezer) hasCatcher = true;
+                else hasRunner = true;
+            }
+            
+            if(!hasCatcher || !hasRunner) {
+                alert("Need at least 1 Catcher and 1 Runner!");
+                return;
+            }
+
+            startSequenceActive = true;
+            document.getElementById('playersPopup').style.display = 'none';
+            document.getElementById('playersOverlay').style.display = 'none';
+
+            if (gameState.mapLayout.length === 0) generateRandomMap();
+            
+            gameState.status = 'startSequence';
+            gameState.winner = null;
+
+            // Reset JoyStick explicitly
+            joyActive = false;
+            activeTouchId = null;
+            document.getElementById('jBase').style.display = 'none';
+            inputVector = { x: 0, y: 0 };
+
+            let pIds = Object.keys(gameState.players);
+            pIds.forEach(id => {
+                let p = gameState.players[id];
+                p.isFrozen = false;
+                p.cooldown = 180; 
+                p.vx = 0; p.vy = 0;
+                
+                let pos = getSafeSpawnPoint(pIds, id);
+                p.x = pos.x; p.y = pos.y;
+                p.targetX = p.x; p.targetY = p.y;
+                p.spawned = true; 
+            });
+            pIds.forEach(id => delete gameState.players[id].spawned);
+
+            forceBroadcastState();
+            triggerClientStart();
+        }
+
+        function triggerClientStart() {
+            showScreen('gameScreen');
+            
+            // Explicitly close popup if open on client
+            document.getElementById('playersPopup').style.display = 'none';
+            document.getElementById('playersOverlay').style.display = 'none';
+            document.getElementById('gameOverUI').classList.remove('active');
+            document.getElementById('gameOverUI').style.display = 'none';
+
+            // Reset JoyStick on client explicitly
+            joyActive = false;
+            activeTouchId = null;
+            document.getElementById('jBase').style.display = 'none';
+            inputVector = { x: 0, y: 0 };
+
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('howToPlayOverlay');
+            const cdUI = document.getElementById('countdownUI');
+            
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+
+            setTimeout(() => {
+                popup.style.display = 'none';
+                overlay.style.display = 'none';
+                cdUI.style.display = 'block';
+                let count = 3;
+                cdUI.innerText = count;
+                triggerHaptic('tap');
+                
+                let int = setInterval(() => {
+                    count--;
+                    if(count > 0) {
+                        cdUI.innerText = count;
+                        triggerHaptic('tap');
+                    }
+                    else if (count === 0) {
+                        cdUI.innerText = "GO!";
+                        triggerHaptic('start');
+                    }
+                    else {
+                        clearInterval(int);
+                        cdUI.style.display = 'none';
+                        if(isHost) {
+                            gameState.status = 'playing';
+                            forceBroadcastState();
+                        }
+                        startSequenceActive = false;
+                    }
+                }, 1000);
+            }, 3500);
+        }
+
+        // --- Game Over Logic ---
+        function showGameOver(winner) {
+            joyActive = false;
+            document.getElementById('jBase').style.display = 'none';
+            inputVector = { x: 0, y: 0 };
+            triggerHaptic('start');
+
+            const title = document.getElementById('goTitle');
+            const subtitle = document.getElementById('goSubtitle');
+
+            if (winner === 'catchers') {
+                title.innerText = "Catchers Win!";
+                title.className = "win-catchers";
+                subtitle.innerText = "All runners were successfully frozen.";
+            } else {
+                title.innerText = "Runners Win!";
+                title.className = "win-runners";
+                subtitle.innerText = "Runners successfully survived.";
+            }
+
+            let active = 0, frozen = 0, catchers = 0;
+            for(let id in gameState.players) {
+                if(gameState.players[id].isFreezer) catchers++;
+                else if(gameState.players[id].isFrozen) frozen++;
+                else active++;
+            }
+
+            document.getElementById('goStats').innerHTML = `
+                <div class="stat-row"><span>Total Catchers</span> <strong>${catchers}</strong></div>
+                <div class="stat-row"><span>Runners Survived</span> <strong>${active}</strong></div>
+                <div class="stat-row"><span>Runners Frozen</span> <strong>${frozen}</strong></div>
+            `;
+
+            const goUI = document.getElementById('gameOverUI');
+            goUI.style.display = 'flex';
+            setTimeout(() => { goUI.classList.add('active'); }, 10);
+        }
+
+        function resetToLobbyUI() {
+            document.getElementById('gameOverUI').classList.remove('active');
+            setTimeout(() => document.getElementById('gameOverUI').style.display = 'none', 300);
+            
+            // Ensure popups are closed
+            document.getElementById('playersPopup').style.display = 'none';
+            document.getElementById('playersOverlay').style.display = 'none';
+            startSequenceActive = false;
+
+            updateLobbyUI();
+            showScreen('lobbyScreen');
+        }
+
+        function enterLobby() {
+            triggerHaptic('tap');
+            if (isHost) {
+                gameState.status = 'lobby';
+                for(let id in gameState.players) {
+                    gameState.players[id].isFrozen = false;
+                    gameState.players[id].cooldown = 0;
+                    gameState.players[id].vx = 0;
+                    gameState.players[id].vy = 0;
+                }
+                forceBroadcastState();
+                resetToLobbyUI();
+            }
+        }
+
+        function exitGame() {
+            triggerHaptic('tap');
+            if (peer) peer.destroy();
+            window.location.reload();
+        }
+
+        // --- Joystick Logic ---
+        const zone = document.getElementById('joystick-zone');
+        const jBase = document.getElementById('jBase');
+        const jStick = document.getElementById('jStick');
+        let joyActive = false;
+        let originX, originY;
+        let activeTouchId = null; 
+
+        function handleStart(e) {
+            if(gameState.status !== 'playing' || (gameState.players[myId] && gameState.players[myId].isFrozen)) return;
+            if (joyActive) return; 
+
+            e.preventDefault(); 
+            joyActive = true;
+            let touch = e.changedTouches ? e.changedTouches[0] : e;
+            if (e.changedTouches) activeTouchId = touch.identifier;
+
+            originX = touch.clientX; 
+            originY = touch.clientY;
+            
+            jBase.style.display = 'block';
+            jBase.style.left = originX + 'px';
+            jBase.style.top = originY + 'px';
+            jStick.style.transform = `translate(-50%, -50%)`;
+            updateInput(touch.clientX, touch.clientY);
+        }
+
+        function handleMove(e) {
+            if (!joyActive) return;
+            e.preventDefault();
+
+            let touch;
+            if (e.changedTouches) {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeTouchId) {
+                        touch = e.changedTouches[i]; break;
+                    }
+                }
+                if (!touch) return; 
+            } else { touch = e; }
+
+            updateInput(touch.clientX, touch.clientY);
+        }
+
+        function handleEnd(e) {
+            if(!joyActive) return;
+            
+            if (e.changedTouches) {
+                let found = false;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeTouchId) { found = true; break; }
+                }
+                if (!found) return; 
+            }
+
+            joyActive = false;
+            activeTouchId = null;
+            jBase.style.display = 'none';
+            inputVector = { x: 0, y: 0 };
+            sendInput();
+        }
+
+        function updateInput(x, y) {
+            let dx = x - originX;
+            let dy = y - originY;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            let maxDist = 35; 
+            if (dist > maxDist) { dx = (dx / dist) * maxDist; dy = (dy / dist) * maxDist; }
+            jStick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            
+            let normX = dx / maxDist;
+            let normY = dy / maxDist;
+            
+            if (Math.abs(inputVector.x - normX) > 0.05 || Math.abs(inputVector.y - normY) > 0.05) {
+                inputVector.x = normX;
+                inputVector.y = normY;
+                sendInput();
+            }
+        }
+
+        zone.addEventListener('mousedown', handleStart, {passive: false});
+        zone.addEventListener('mousemove', handleMove, {passive: false});
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('mouseleave', handleEnd); 
+        
+        zone.addEventListener('touchstart', handleStart, {passive: false});
+        zone.addEventListener('touchmove', handleMove, {passive: false});
+        window.addEventListener('touchend', handleEnd, {passive: false});
+        window.addEventListener('touchcancel', handleEnd, {passive: false});
+
+        function sendInput() {
+            if (isHost) {
+                if(gameState.players[myId] && !gameState.players[myId].isFrozen && gameState.status === 'playing') {
+                    gameState.players[myId].vx = inputVector.x;
+                    gameState.players[myId].vy = inputVector.y;
+                }
+            } else if (conn && conn.open) {
+                conn.send({ type: 'input', vx: inputVector.x, vy: inputVector.y });
+                // Optimistic local update
+                if (gameState.players[myId] && !gameState.players[myId].isFrozen && gameState.status === 'playing') {
+                     gameState.players[myId].vx = inputVector.x;
+                     gameState.players[myId].vy = inputVector.y;
+                }
+            }
+        }
+
+        // --- Physics & Collision (Host) ---
+        const SPEED = 4.0;
+        
+        function updatePhysics() {
+            if (gameState.status !== 'playing') return;
+
+            let pIds = Object.keys(gameState.players);
+            
+            for (let id of pIds) {
+                let p = gameState.players[id];
+                if (p.cooldown > 0) p.cooldown--;
+
+                if (!p.isFrozen) {
+                    p.x += p.vx * SPEED;
+                    p.y += p.vy * SPEED;
+                    p.x = Math.max(p.radius, Math.min(width - p.radius, p.x));
+                    p.y = Math.max(p.radius, Math.min(height - p.radius, p.y));
+
+                    for(let obs of mapBubbles) {
+                        let dx = p.x - obs.x; let dy = p.y - obs.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        let minDist = p.radius + obs.currentRadius;
+                        
+                        if(dist < minDist && dist > 0) {
+                            let overlap = minDist - dist;
+                            
+                            if (p.isFreezer) {
+                                obs.currentRadius -= overlap * 0.15; 
+                                p.x += (dx/dist) * (overlap * 0.25);
+                                p.y += (dy/dist) * (overlap * 0.25);
+                                if(id === myId && overlap > 2 && Math.random() > 0.8) triggerHaptic('bounce');
+                            } else {
+                                obs.currentRadius -= overlap * 0.08;
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (let i = 0; i < pIds.length; i++) {
+                for (let j = i + 1; j < pIds.length; j++) {
+                    let p1 = gameState.players[pIds[i]];
+                    let p2 = gameState.players[pIds[j]];
+
+                    let dx = p2.x - p1.x; let dy = p2.y - p1.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    let minDist = (p1.radius + p2.radius) * 1.1; 
+
+                    if (dist < minDist) {
+                        if (p1.cooldown === 0 && p2.cooldown === 0) {
+                            if (p1.isFreezer && !p2.isFreezer && !p2.isFrozen) {
+                                p2.isFrozen = true; p2.cooldown = 60; 
+                            }
+                            else if (p2.isFreezer && !p1.isFreezer && !p1.isFrozen) {
+                                p1.isFrozen = true; p1.cooldown = 60;
+                            }
+                            else if (!p1.isFreezer && !p2.isFreezer) {
+                                if (p1.isFrozen && !p2.isFrozen) { p1.isFrozen = false; p1.cooldown = 90; }
+                                else if (p2.isFrozen && !p1.isFrozen) { p2.isFrozen = false; p2.cooldown = 90; }
+                            }
+                        }
+                        let overlap = minDist - dist;
+                        if (overlap > 0 && dist > 0) {
+                            let nx = dx / dist; let ny = dy / dist;
+                            if(!p1.isFrozen){ p1.x -= nx * (overlap/3); p1.y -= ny * (overlap/3); }
+                            if(!p2.isFrozen){ p2.x += nx * (overlap/3); p2.y += ny * (overlap/3); }
+                        }
+                    }
+                }
+            }
+
+            let runners = 0, frozenRunners = 0;
+            for (let id in gameState.players) {
+                if (!gameState.players[id].isFreezer) {
+                    runners++;
+                    if (gameState.players[id].isFrozen) frozenRunners++;
+                }
+            }
+
+            if (runners > 0 && frozenRunners === runners) {
+                gameState.status = 'gameOver';
+                gameState.winner = 'catchers';
+                forceBroadcastState();
+                showGameOver('catchers');
+            } else {
+                broadcastState(); 
+            }
+        }
+
+        function updateBubbles() {
+            for(let b of mapBubbles) {
+                let force = (b.baseRadius - b.currentRadius) * b.springFactor;
+                b.vR = (b.vR + force) * b.damping;
+                b.currentRadius += b.vR;
+                b.wobbleOffset += 0.05;
+            }
+        }
+
+        function clientExtrapolate() {
+             if (isHost || gameState.status !== 'playing') return;
+             
+             let pIds = Object.keys(gameState.players);
+             for (let id of pIds) {
+                 if (id === myId) {
+                     let p = gameState.players[id];
+                     if (!p.isFrozen && p.vx !== undefined && p.vy !== undefined) {
+                         p.x += p.vx * SPEED;
+                         p.y += p.vy * SPEED;
+                         p.x = Math.max(p.radius, Math.min(width - p.radius, p.x));
+                         p.y = Math.max(p.radius, Math.min(height - p.radius, p.y));
+                     }
+                     continue; 
+                 }
+                 
+                 let p = gameState.players[id];
+                 if (p.targetX !== undefined && p.targetY !== undefined) {
+                     p.x += (p.targetX - p.x) * 0.4;
+                     p.y += (p.targetY - p.y) * 0.4;
+                 }
+             }
+        }
+
+        function checkHapticState() {
+            if (gameState.players && gameState.players[myId]) {
+                const isCurrentlyFrozen = gameState.players[myId].isFrozen;
+                if (isCurrentlyFrozen && !localFrozenState) {
+                    triggerHaptic('freeze');
+                    if(joyActive) handleEnd({changedTouches: [{identifier: activeTouchId}]}); 
+                } else if (!isCurrentlyFrozen && localFrozenState) {
+                    triggerHaptic('unfreeze');
+                }
+                localFrozenState = isCurrentlyFrozen;
+            }
+        }
+
+        // --- Rendering ---
+        function drawMap() {
+            ctx.strokeStyle = 'var(--grid-color)';
+            ctx.lineWidth = 1;
+            const gridSize = 80;
+            ctx.beginPath();
+            for(let x = 0; x < width; x += gridSize) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+            for(let y = 0; y < height; y += gridSize) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
+            ctx.stroke();
+
+            for(let obs of mapBubbles) {
+                ctx.save();
+                ctx.translate(obs.x, obs.y);
+                let wobbleX = Math.sin(obs.wobbleOffset) * 2;
+                let wobbleY = Math.cos(obs.wobbleOffset * 0.8) * 2;
+
+                ctx.beginPath();
+                ctx.ellipse(wobbleX, wobbleY + obs.currentRadius*0.3, obs.currentRadius * 0.9, obs.currentRadius * 0.8, 0, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(26, 20, 18, 0.4)'; 
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(wobbleX, wobbleY, obs.currentRadius, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(201, 154, 108, 0.1)'; 
+                ctx.fill();
+
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(201, 154, 108, 0.5)';
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(wobbleX - obs.currentRadius*0.3, wobbleY - obs.currentRadius*0.3, obs.currentRadius*0.2, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        function drawPlayer(p, isMe) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+
+            let vx = isHost ? p.vx : (p.targetX !== undefined ? (p.targetX - p.x)*0.1 : 0);
+            let vy = isHost ? p.vy : (p.targetY !== undefined ? (p.targetY - p.y)*0.1 : 0);
+            if(isMe) { vx = p.vx; vy = p.vy; }
+
+            let speedSq = vx*vx + vy*vy;
+            let speed = Math.sqrt(speedSq);
+            let angle = Math.atan2(vy, vx);
+
+            let bob = 0, stretch = 1, squeeze = 1;
+            if (speed > 0.05 && !p.isFrozen) {
+                let time = Date.now() / 150;
+                bob = Math.abs(Math.sin(time)) * 4;
+                stretch = 1 + (speed * 0.2); 
+                squeeze = 1 - (speed * 0.05);
+            }
+
+            if (isMe) {
+                ctx.beginPath();
+                ctx.arc(0, 0, p.radius + 6 + Math.sin(Date.now()/200)*2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(201, 154, 108, 0.1)';
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = 'rgba(201, 154, 108, 0.4)';
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+            ctx.ellipse(0, p.radius * 0.6, p.radius * 0.8, p.radius * 0.4, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fill();
+
+            ctx.translate(0, -bob);
+            if (speed > 0.05 && !p.isFrozen) {
+                ctx.rotate(angle);
+                ctx.scale(stretch, squeeze);
+                ctx.rotate(-angle);
+            }
+
+            let mainColor = p.isFreezer ? '#e63946' : (p.isFrozen ? '#4da6ff' : '#2a9d8f');
+            let highlight = p.isFreezer ? '#ff4d5a' : (p.isFrozen ? '#66b8ff' : '#32bcae');
+            let outlineColor = p.isFreezer ? '#9b222f' : (p.isFrozen ? '#2d6a9e' : '#1d6b61');
+
+            ctx.beginPath(); ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = mainColor; ctx.fill();
+            ctx.lineWidth = 2.5; ctx.strokeStyle = outlineColor; ctx.stroke();
+
+            ctx.beginPath(); ctx.arc(-p.radius*0.2, -p.radius*0.2, p.radius*0.4, 0, Math.PI * 2);
+            ctx.fillStyle = highlight; ctx.fill();
+
+            let eyeOffsetX = (vx/SPEED) * 3;
+            let eyeOffsetY = (vy/SPEED) * 3;
+            
+            if (p.isFrozen) {
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-6, -4); ctx.lineTo(-2, 0); ctx.moveTo(-2, -4); ctx.lineTo(-6, 0);
+                ctx.moveTo(2, -4); ctx.lineTo(6, 0); ctx.moveTo(6, -4); ctx.lineTo(2, 0);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.arc(-4 + eyeOffsetX, -2 + eyeOffsetY, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(4 + eyeOffsetX, -2 + eyeOffsetY, 2.5, 0, Math.PI*2); ctx.fill();
+                
+                if (p.isFreezer) {
+                    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(-7 + eyeOffsetX, -6 + eyeOffsetY); ctx.lineTo(-2 + eyeOffsetX, -4 + eyeOffsetY); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(7 + eyeOffsetX, -6 + eyeOffsetY); ctx.lineTo(2 + eyeOffsetX, -4 + eyeOffsetY); ctx.stroke();
+                }
+            }
+
+            if (p.isFrozen) {
+                let size = p.radius * 2.4; let offset = -size / 2;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                if(ctx.roundRect) {
+                    ctx.beginPath(); ctx.roundRect(offset, offset, size, size, 6); ctx.fill();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
+                } else { 
+                    ctx.fillRect(offset, offset, size, size); 
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.strokeRect(offset, offset, size, size);
+                }
+            }
+            
+            ctx.restore();
+
+            ctx.font = '800 14px "Roboto Slab", serif';
+            ctx.textAlign = 'center';
+            let tagY = p.y - p.radius - (p.isFrozen ? 25 : 18) - bob;
+            
+            ctx.lineJoin = 'round'; ctx.miterLimit = 2;
+            ctx.lineWidth = 4; ctx.strokeStyle = "rgba(26, 20, 18, 0.9)";
+            ctx.strokeText(p.name, p.x, tagY);
+            
+            ctx.fillStyle = '#e8dbd1';
+            ctx.fillText(p.name, p.x, tagY);
+        }
+
+        function gameLoop() {
+            if (isHost) {
+                updatePhysics();
+            } else {
+                clientExtrapolate(); 
+            }
+            
+            updateBubbles(); 
+            checkHapticState();
+            
+            if (!isHost && gameState.status === 'playing') updateUIStats();
+
+            if (document.getElementById('gameScreen').classList.contains('active')) {
+                ctx.clearRect(0, 0, width, height);
+                drawMap();
+                let sortedIds = Object.keys(gameState.players).sort((a, b) => {
+                    return (gameState.players[a].isFrozen === gameState.players[b].isFrozen) ? 0 : gameState.players[a].isFrozen ? -1 : 1;
+                });
+                for (let id of sortedIds) {
+                    drawPlayer(gameState.players[id], id === myId);
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
