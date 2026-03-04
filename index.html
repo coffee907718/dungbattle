@@ -17,8 +17,8 @@
             --player-red: #d32f2f;
             --player-blue: #1976d2;
             --accent: #fbc02d;
-            --bg: #e6dace;
-            --card-bg: rgba(245, 238, 230, 0.95);
+            --bg: #cda98f;
+            --card-bg: rgba(225, 203, 185, 0.95);
             --outline: #21100b;
         }
 
@@ -29,84 +29,44 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
 
-        body {
+        html, body {
             font-family: 'Roboto Slab', serif;
             background-color: var(--bg);
             color: var(--brown-dark);
             overflow: hidden;
             touch-action: none;
+            overscroll-behavior: none;
             width: 100vw; 
+            height: 100vh; /* Fallback */
             height: 100dvh;
+            margin: 0;
+            padding: 0;
+            position: fixed; /* Locks the page on iOS Safari to prevent bounce and scrolling */
+            top: 0;
+            left: 0;
             display: flex; 
             justify-content: center; 
             align-items: center;
         }
 
         #app {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%; 
             height: 100%;
             display: flex; 
             justify-content: center; 
             align-items: center;
-            position: relative;
-        }
-
-        #welcome-dialog {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(230, 218, 206, 0.5);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .welcome-card {
-            background: var(--card-bg);
-            padding: 35px 25px;
-            border: 4px solid var(--outline);
-            border-radius: 16px;
-            box-shadow: 8px 8px 0px rgba(93, 64, 55, 0.4), 0 15px 35px rgba(0,0,0,0.2);
-            text-align: center;
-            max-width: 380px;
-            width: 90%;
-        }
-
-        .welcome-card h2 {
-            font-size: 2.2rem;
-            color: var(--outline);
-            margin-bottom: 15px;
-            font-weight: 900;
-            line-height: 1.1;
-        }
-
-        .welcome-card p {
-            font-size: 1.15rem;
-            color: var(--brown-dark);
-            margin-bottom: 25px;
-            line-height: 1.5;
-            font-weight: 700;
-        }
-
-        .welcome-card strong {
-            color: var(--player-blue);
-        }
-
-        #btn-welcome-ok {
-            margin: 0;
-            width: 100%;
         }
 
         .screen {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%; 
             height: 100%;
             display: none;
@@ -118,6 +78,7 @@
             padding: 20px;
             background-color: var(--bg);
             z-index: 10;
+            box-sizing: border-box;
         }
 
         .screen.active { 
@@ -138,6 +99,7 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         h1 { 
@@ -161,7 +123,7 @@
             font-weight: 700;
             outline: none;
             text-align: center;
-            background-color: #f7f0e8;
+            background-color: #efe6dd;
             color: var(--brown-dark);
             user-select: auto;
             -webkit-user-select: auto;
@@ -232,14 +194,18 @@
             height: 100%;
             background: var(--brown-dark);
             display: none;
+            justify-content: center;
+            align-items: center;
             z-index: 5;
-            padding-bottom: env(safe-area-inset-bottom);
         }
 
         canvas { 
             display: block; 
-            margin: auto; 
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+            transform-origin: center center;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .hud {
@@ -248,7 +214,7 @@
             width: 100%;
             display: flex; 
             justify-content: space-between;
-            padding: 0 40px;
+            padding: 0 max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
             pointer-events: none;
             z-index: 20;
             flex-direction: row;
@@ -277,20 +243,18 @@
 
         #joystick-base {
             position: absolute;
-            display: block; 
-            bottom: max(60px, calc(env(safe-area-inset-bottom) + 20px)); 
-            left: 50%;
-            transform: translateX(-50%);
-            width: 160px;
-            height: 160px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             z-index: 50;
             pointer-events: none; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2), inset 0 4px 10px rgba(255,255,255,0.1);
+            transform: translate(-50%, -50%);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15), inset 0 2px 8px rgba(255,255,255,0.05);
         }
 
         #joystick-stick {
@@ -298,13 +262,13 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 70px;
-            height: 70px;
+            width: 40px;
+            height: 40px;
             background: linear-gradient(145deg, #ffffff, #e6e6e6);
             border: 2px solid rgba(0,0,0,0.1);
             border-radius: 50%;
             pointer-events: none;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3), inset -2px -2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2), inset -2px -2px 4px rgba(0,0,0,0.1);
             transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
@@ -530,15 +494,6 @@
   </div>
 
 <div id="app">
-    <div id="welcome-dialog">
-        <div class="welcome-card">
-            <h2>Welcome to Dung Battle!</h2>
-            <p><strong>Play in Full Screen on iPhone:</strong><br>
-Tap the <strong>Share</strong> icon, select <strong>"Add to Home Screen"</strong>, then open the game from your Home Screen to play without browser interruptions.</p>
-            <button id="btn-welcome-ok">OK, LET'S PLAY!</button>
-        </div>
-    </div>
-
     <div id="screen-home" class="screen active">
         <div class="card">
             <h1>DUNG BATTLE</h1>
@@ -569,7 +524,7 @@ Tap the <strong>Share</strong> icon, select <strong>"Add to Home Screen"</strong
                 </select>
             </div>
 
-            <div id="player-list" style="text-align: left; background: #f2e9e0; padding: 12px; border-radius: 10px; border: 2px solid #e0d4c8; min-height: 150px; max-height: 250px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <div id="player-list" style="text-align: left; background: #e5d7c8; padding: 12px; border-radius: 10px; border: 2px solid #e0d4c8; min-height: 150px; max-height: 250px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
                 </div>
             <div id="lobby-status" class="status-msg">Waiting...</div>
             <button id="btn-start" disabled style="display: none; background: linear-gradient(145deg, #4caf50, #2e7d32); color: white; border-color: #1b5e20;">START BATTLE</button>
@@ -609,6 +564,9 @@ Tap the <strong>Share</strong> icon, select <strong>"Add to Home Screen"</strong
 </div>
 
 <script>
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('dblclick', event => event.preventDefault(), { passive: false });
+
 const AudioSystem = {
     sounds: [
         'https://www.myinstants.com/media/sounds/tudum-tedev.mp3',
@@ -902,7 +860,7 @@ const UI = {
         document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
         document.getElementById('game-container').style.display = 'none';
         if (id === 'game') {
-            document.getElementById('game-container').style.display = 'block';
+            document.getElementById('game-container').style.display = 'flex';
         } else {
             const target = document.getElementById('screen-' + id);
             target.style.display = 'flex';
@@ -913,23 +871,23 @@ const UI = {
 
 const Game = {
     cvs: null, ctx: null,
-    w: 700, h: 1000,
+    w: 800, h: 1200,
     running: false,
     gameScore: { red: 0, blue: 0 },
     
     activePlayers: {}, 
-    ball: { x: 350, y: 500, vx: 0, vy: 0, r: 35, targetX: 350, targetY: 500 },
+    ball: { x: 400, y: 600, vx: 0, vy: 0, r: 28, targetX: 400, targetY: 600, angle: 0 },
     particles: [],
     
-    joystick: { active: false, maxRadius: 55, dx: 0, dy: 0, id: null },
+    joystick: { active: false, maxRadius: 45, dx: 0, dy: 0, id: null, outX: 0, outY: 0 },
     joystickCenter: { x: 0, y: 0 },
     lastSyncTime: 0,
     lastTime: 0,
     animationFrameId: null,
     
     wasTouching: false,
-    lastBallX: 350,
-    lastBallY: 500,
+    lastBallX: 400,
+    lastBallY: 600,
     lastMx: 0,
     lastMy: 0,
     lastInputTime: 0,
@@ -938,16 +896,19 @@ const Game = {
         this.cvs = document.getElementById('gameCanvas');
         this.ctx = this.cvs.getContext('2d', { alpha: false });
         this.fit();
-        window.addEventListener('resize', () => {
-            this.fit();
-            this.updateJoystickCenter();
-        });
+        
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => this.fit());
+        } else {
+            window.addEventListener('resize', () => this.fit());
+        }
+        
         this.setupJoystick();
     },
 
     fit() {
-        const availableW = window.innerWidth;
-        const availableH = window.innerHeight;
+        const availableW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        const availableH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
         const scale = Math.min(availableW / this.w, availableH / this.h);
         this.cvs.width = this.w; 
         this.cvs.height = this.h;
@@ -955,19 +916,10 @@ const Game = {
         this.cvs.style.height = (this.h * scale) + 'px';
     },
 
-    updateJoystickCenter() {
-        const base = document.getElementById('joystick-base');
-        if (base) {
-            const rect = base.getBoundingClientRect();
-            if (rect.width > 0) {
-                this.joystickCenter = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-            }
-        }
-    },
-    
     setupJoystick() {
         const zone = document.getElementById('game-container');
         const stick = document.getElementById('joystick-stick');
+        const base = document.getElementById('joystick-base');
 
         const handleMove = (e) => {
             if (!this.joystick.active) return;
@@ -1011,10 +963,24 @@ const Game = {
             if (e.target.closest('.hud') || e.target.closest('.fs-btn') || e.target.closest('.sound-btn') || e.target.closest('#overlay')) return;
             if (this.joystick.active) return;
             
-            this.updateJoystickCenter(); 
-            
+            let clientX, clientY;
+            if (e.touches) {
+                this.joystick.id = e.changedTouches[0].identifier;
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            this.joystickCenter = { x: clientX, y: clientY };
+            base.style.left = clientX + 'px';
+            base.style.top = clientY + 'px';
+            base.style.display = 'block';
+
             this.joystick.active = true;
-            if (e.touches) this.joystick.id = e.changedTouches[0].identifier;
+            this.joystick.dx = 0;
+            this.joystick.dy = 0;
             stick.style.transition = 'none';
             handleMove(e);
         };
@@ -1035,6 +1001,7 @@ const Game = {
             this.joystick.id = null;
             stick.style.transition = 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)';
             stick.style.transform = `translate(-50%, -50%)`;
+            base.style.display = 'none';
         };
 
         zone.addEventListener('touchstart', handleStart, { passive: false });
@@ -1079,9 +1046,9 @@ const Game = {
                 name: p.name,
                 team: p.team,
                 color: p.team === 'red' ? '#e53935' : '#1e88e5',
-                r: 40,
-                x: 350, y: 500,
-                targetX: 350, targetY: 500,
+                r: 48,
+                x: 400, y: 600,
+                targetX: 400, targetY: 600,
                 input: { mx: 0, my: 0 }
             };
         }
@@ -1134,27 +1101,28 @@ const Game = {
         this.running = true;
         document.getElementById('overlay').style.display = 'none';
         UI.go('game');
-        
-        setTimeout(() => this.updateJoystickCenter(), 100);
+
+        setTimeout(() => this.fit(), 50);
 
         this.lastTime = performance.now();
         this.animationFrameId = requestAnimationFrame((t) => this.loop(t));
     },
 
     resetPositions() {
-        this.ball.x = 350; this.ball.y = 500;
+        this.ball.x = 400; this.ball.y = 600;
         this.ball.vx = 0; this.ball.vy = 0;
-        this.ball.targetX = 350; this.ball.targetY = 500;
+        this.ball.targetX = 400; this.ball.targetY = 600;
+        this.ball.angle = 0;
         
         let redIdx = 0, blueIdx = 0;
         for(let id in this.activePlayers) {
             const p = this.activePlayers[id];
             if(p.team === 'red') {
-                p.x = 250 + (redIdx % 3) * 100;
-                p.y = 850 - Math.floor(redIdx/3)*100;
+                p.x = 300 + (redIdx % 3) * 100;
+                p.y = 1050 - Math.floor(redIdx/3)*100;
                 redIdx++;
             } else {
-                p.x = 250 + (blueIdx % 3) * 100;
+                p.x = 300 + (blueIdx % 3) * 100;
                 p.y = 150 + Math.floor(blueIdx/3)*100;
                 blueIdx++;
             }
@@ -1168,25 +1136,32 @@ const Game = {
         if (!this.running) return;
         const fps60 = dt * 60;
 
-        let mx = 0, my = 0;
-        if (this.joystick.dx !== 0 || this.joystick.dy !== 0) {
+        let targetMx = 0, targetMy = 0;
+        const deadZone = 6;
+        
+        if (this.joystick.active && (this.joystick.dx !== 0 || this.joystick.dy !== 0)) {
             const dist = Math.sqrt(this.joystick.dx**2 + this.joystick.dy**2);
-            if (dist > 5) {
-                const normalizedDist = Math.min(dist / this.joystick.maxRadius, 1);
-                const factor = normalizedDist; 
-                
-                mx = (this.joystick.dx / dist) * factor;
-                my = (this.joystick.dy / dist) * factor;
+            if (dist > deadZone) {
+                const normalizedDist = Math.min((dist - deadZone) / (this.joystick.maxRadius - deadZone), 1);
+                targetMx = (this.joystick.dx / dist) * normalizedDist;
+                targetMy = (this.joystick.dy / dist) * normalizedDist;
             }
 
             if (this.activePlayers[Net.myId] && this.activePlayers[Net.myId].team === 'blue') {
-                mx = -mx;
-                my = -my;
+                targetMx = -targetMx;
+                targetMy = -targetMy;
             }
         }
 
-        mx = Math.round(mx * 100) / 100;
-        my = Math.round(my * 100) / 100;
+        // Smoothly interpolate joystick output to prevent harsh snapping
+        this.joystick.outX += (targetMx - this.joystick.outX) * Math.min(dt * 25, 1);
+        this.joystick.outY += (targetMy - this.joystick.outY) * Math.min(dt * 25, 1);
+
+        if (Math.abs(this.joystick.outX) < 0.01) this.joystick.outX = 0;
+        if (Math.abs(this.joystick.outY) < 0.01) this.joystick.outY = 0;
+
+        let mx = Math.round(this.joystick.outX * 100) / 100;
+        let my = Math.round(this.joystick.outY * 100) / 100;
 
         if(this.activePlayers[Net.myId]) {
             this.activePlayers[Net.myId].input = { mx, my };
@@ -1194,7 +1169,8 @@ const Game = {
 
         if (!Net.isHost) {
             const now = Date.now();
-            if (mx !== this.lastMx || my !== this.lastMy || now - (this.lastInputTime || 0) > 50) {
+            // Send input strictly if changed or periodically
+            if (Math.abs(mx - this.lastMx) > 0.05 || Math.abs(my - this.lastMy) > 0.05 || now - this.lastInputTime > 50) {
                 Net.sendToHost('PLAYER_INPUT', { mx, my });
                 this.lastMx = mx;
                 this.lastMy = my;
@@ -1204,6 +1180,9 @@ const Game = {
             const ballLerp = 1 - Math.pow(1 - 0.4, fps60);
             this.ball.x += (this.ball.targetX - this.ball.x) * ballLerp;
             this.ball.y += (this.ball.targetY - this.ball.y) * ballLerp;
+            
+            const speed = Math.sqrt((this.ball.targetX - this.lastBallX)**2 + (this.ball.targetY - this.lastBallY)**2);
+            this.ball.angle += speed * 0.05 * fps60;
 
             for(let id in this.activePlayers) {
                 let p = this.activePlayers[id];
@@ -1287,35 +1266,42 @@ const Game = {
         this.ball.x += this.ball.vx * fps60;
         this.ball.y += this.ball.vy * fps60;
         
+        let speed = Math.sqrt(this.ball.vx**2 + this.ball.vy**2);
+        this.ball.angle += speed * 0.05 * fps60;
+        
         this.ball.vx *= Math.pow(0.975, fps60); 
         this.ball.vy *= Math.pow(0.975, fps60);
         this.ball.targetX = this.ball.x;
         this.ball.targetY = this.ball.y;
 
-        const goalWidth = 220;
+        const goalWidth = 240;
         const goalLeft = (this.w - goalWidth) / 2;
         const goalRight = goalLeft + goalWidth;
 
-        if (this.ball.x > goalLeft && this.ball.x < goalRight) {
-            if (this.ball.y <= this.ball.r) {
+        if (this.ball.y <= this.ball.r) {
+            if (this.ball.x > goalLeft && this.ball.x < goalRight) {
                 this.gameScore.red++;
                 this.onGoal('red');
                 return;
+            } else {
+                this.ball.vy *= -0.7;
+                this.ball.y = this.ball.r;
             }
-            if (this.ball.y >= this.h - this.ball.r) {
+        }
+        if (this.ball.y >= this.h - this.ball.r) {
+            if (this.ball.x > goalLeft && this.ball.x < goalRight) {
                 this.gameScore.blue++;
                 this.onGoal('blue');
                 return;
+            } else {
+                this.ball.vy *= -0.7;
+                this.ball.y = this.h - this.ball.r;
             }
-        } 
+        }
         
         if (this.ball.x < this.ball.r || this.ball.x > this.w - this.ball.r) {
             this.ball.vx *= -0.7;
             this.ball.x = this.ball.x < this.ball.r ? this.ball.r : this.w - this.ball.r;
-        }
-        if (this.ball.y < this.ball.r || this.ball.y > this.h - this.ball.r) {
-            this.ball.vy *= -0.7;
-            this.ball.y = this.ball.y < this.ball.r ? this.ball.r : this.h - this.ball.r;
         }
 
         for(let id in this.activePlayers) {
@@ -1417,21 +1403,21 @@ const Game = {
         c.beginPath(); c.moveTo(0, this.h/2); c.lineTo(this.w, this.h/2); c.stroke();
         c.beginPath(); c.arc(this.w/2, this.h/2, 80, 0, Math.PI*2); c.stroke();
 
-        const goalWidth = 220;
+        const goalWidth = 240;
         const goalLeft = (this.w - goalWidth) / 2;
         
         const gBlue = c.createLinearGradient(0, 0, 0, 40);
         gBlue.addColorStop(0, 'rgba(21, 101, 192, 0.9)');
         gBlue.addColorStop(1, 'rgba(13, 71, 161, 0.9)');
         c.fillStyle = gBlue;
-        c.beginPath(); c.roundRect(goalLeft, 0, goalWidth, 40, [0,0,12,12]); c.fill();
+        c.beginPath(); c.rect(goalLeft, 0, goalWidth, 40); c.fill();
         c.strokeStyle = 'rgba(255,255,255,0.2)'; c.lineWidth = 2; c.stroke();
         
         const gRed = c.createLinearGradient(0, this.h - 40, 0, this.h);
         gRed.addColorStop(0, 'rgba(198, 40, 40, 0.9)');
         gRed.addColorStop(1, 'rgba(183, 28, 28, 0.9)');
         c.fillStyle = gRed;
-        c.beginPath(); c.roundRect(goalLeft, this.h - 40, goalWidth, 40, [12,12,0,0]); c.fill();
+        c.beginPath(); c.rect(goalLeft, this.h - 40, goalWidth, 40); c.fill();
         c.stroke();
 
         for(let i=0; i<this.particles.length; i++) {
@@ -1444,24 +1430,51 @@ const Game = {
 
         c.save();
         c.translate(this.ball.x, this.ball.y);
+        c.rotate(this.ball.angle || 0);
         
-        c.fillStyle = 'rgba(0,0,0,0.3)';
-        c.beginPath(); c.arc(0, 6, this.ball.r, 0, Math.PI*2); c.fill();
+        let pulse = 1 + Math.sin(Date.now() / 250) * 0.04;
+        let br = this.ball.r * pulse;
+
+        c.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        c.shadowBlur = 10;
+        c.shadowOffsetY = 5;
         
-        const bGrad = c.createRadialGradient(-10, -10, 5, 0, 0, this.ball.r);
-        bGrad.addColorStop(0, '#795548');
-        bGrad.addColorStop(1, '#21100b');
+        const bGrad = c.createRadialGradient(-br*0.4, -br*0.4, br*0.1, 0, 0, br);
+        bGrad.addColorStop(0, '#ffffff'); 
+        bGrad.addColorStop(0.3, '#fdfbf7'); 
+        bGrad.addColorStop(0.8, '#e6decb'); 
+        bGrad.addColorStop(1, '#c5bba8'); 
         c.fillStyle = bGrad;
         
-        c.beginPath(); c.arc(0,0,this.ball.r,0,Math.PI*2); c.fill();
+        c.beginPath(); 
+        c.arc(0, 0, br, 0, Math.PI*2); 
+        c.fill();
         
-        c.strokeStyle = 'rgba(0,0,0,0.5)';
-        c.lineWidth = 3;
+        c.shadowColor = 'transparent'; 
+        c.shadowBlur = 0;
+        c.shadowOffsetY = 0;
+        
+        c.strokeStyle = 'rgba(120, 110, 100, 0.5)'; 
+        c.lineWidth = 2;
+        c.beginPath(); 
+        c.arc(0, 0, br, 0, Math.PI*2); 
         c.stroke();
         
-        c.fillStyle = 'rgba(0,0,0,0.2)';
-        c.beginPath(); c.arc(0, 0, this.ball.r/2, 0, Math.PI*2); c.fill();
-        c.strokeStyle = 'rgba(255,255,255,0.05)'; c.lineWidth = 2; c.stroke();
+        c.fillStyle = 'rgba(255,255,255,0.9)';
+        c.beginPath(); c.ellipse(-br*0.3, -br*0.3, br*0.3, br*0.15, Math.PI/4, 0, Math.PI*2); c.fill();
+        
+        c.strokeStyle = 'rgba(0,0,0,0.1)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(-br*0.6, 0);
+        c.quadraticCurveTo(0, br*0.4, br*0.6, 0);
+        c.stroke();
+        
+        c.beginPath();
+        c.moveTo(0, -br*0.6);
+        c.quadraticCurveTo(br*0.4, 0, 0, br*0.6);
+        c.stroke();
+        
         c.restore();
 
         for(let id in this.activePlayers) {
@@ -1503,13 +1516,13 @@ const Game = {
             c.fill();
             
             c.fillStyle = 'white';
-            const eyeX = p.team === 'red' ? 14 : -14;
-            c.beginPath(); c.arc(eyeX, -10, 5, 0, Math.PI*2); c.fill();
-            c.beginPath(); c.arc(eyeX, 10, 5, 0, Math.PI*2); c.fill();
+            const eyeX = p.team === 'red' ? 16 : -16;
+            c.beginPath(); c.arc(eyeX, -12, 6, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(eyeX, 12, 6, 0, Math.PI*2); c.fill();
             
             c.fillStyle = '#1a0b08';
-            c.beginPath(); c.arc(eyeX + (p.team==='red'?1:-1), -10, 2, 0, Math.PI*2); c.fill();
-            c.beginPath(); c.arc(eyeX + (p.team==='red'?1:-1), 10, 2, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(eyeX + (p.team==='red'?1:-1), -12, 2.5, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(eyeX + (p.team==='red'?1:-1), 12, 2.5, 0, Math.PI*2); c.fill();
             
             c.restore();
             
@@ -1583,10 +1596,6 @@ document.getElementById('btn-start').onclick = () => {
 
 AudioSystem.init();
 Game.init();
-
-document.getElementById('btn-welcome-ok').onclick = () => {
-    document.getElementById('welcome-dialog').style.display = 'none';
-};
 
 document.getElementById('btn-fs').onclick = () => {
     const docElm = document.documentElement;
