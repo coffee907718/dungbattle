@@ -40,11 +40,11 @@
             touch-action: none;
             overscroll-behavior: none;
             width: 100vw; 
-            height: 100vh; /* Fallback */
+            height: 100vh;
             height: 100dvh;
             margin: 0;
             padding: 0;
-            position: fixed; /* Locks the page on iOS Safari to prevent bounce and scrolling */
+            position: fixed;
             top: 0;
             left: 0;
             display: flex; 
@@ -658,10 +658,15 @@ const Net = {
     players: {}, 
     maxScore: 5,
     ROOM_PREFIX: "DUNGBTL-",
+    heartbeatInterval: null,
     
     cfg: {
         iceServers: [
-            { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
             { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
             { urls: 'stun:stun.cloudflare.com:3478' },
             { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
@@ -679,8 +684,9 @@ const Net = {
         const peerId = isHost ? (this.ROOM_PREFIX + roomId) : `GUEST-${Math.floor(Math.random() * 9999999)}`;
         this.peer = new Peer(peerId, { 
             config: this.cfg,
-            debug: 1,
-            secure: true 
+            debug: 2,
+            secure: true,
+            pingInterval: 5000 
         });
 
         this.peer.on('open', (id) => {
@@ -723,19 +729,19 @@ const Net = {
         this.peer.on('error', (err) => {
             console.error("PeerJS Error:", err.type, err);
             if (err.type === 'peer-unavailable') {
-                document.getElementById('home-error').innerText = "Room not found.";
+                document.getElementById('home-error').innerText = "Room not found. Check ID.";
                 if (!document.getElementById('screen-home').classList.contains('active')) UI.go('home');
             } else if (err.type === 'network' || err.type === 'server-error') {
-                document.getElementById('lobby-status').innerText = "Signaling server error. Reconnecting...";
+                document.getElementById('lobby-status').innerText = "Network Error. Reconnecting...";
                 setTimeout(() => { if (!this.peer.destroyed) this.peer.reconnect(); }, 2000);
             } else {
-                document.getElementById('home-error').innerText = "Network Error: " + err.type;
+                document.getElementById('home-error').innerText = "Error: " + err.type;
                 if (!document.getElementById('screen-home').classList.contains('active')) UI.go('home');
             }
         });
     },
 
-    connectToHost(hostId, retries = 4) {
+    connectToHost(hostId, retries = 5, backoff = 1000) {
         console.log(`Attempting to connect to host: ${hostId}. Retries left: ${retries}`);
         this.hostConn = this.peer.connect(hostId, { 
             reliable: true,
@@ -747,14 +753,13 @@ const Net = {
         const connTimeout = setTimeout(() => {
             if (!resolved) {
                 console.warn("Connection timeout to host.");
-                if (this.hostConn) {
-                    this.hostConn.close();
-                }
+                if (this.hostConn) this.hostConn.close();
+                
                 if (retries > 0) {
                     document.getElementById('lobby-status').innerText = `Retrying connection... (${retries})`;
-                    setTimeout(() => this.connectToHost(hostId, retries - 1), 1500);
+                    setTimeout(() => this.connectToHost(hostId, retries - 1, backoff * 1.5), backoff);
                 } else {
-                    document.getElementById('home-error').innerText = "Could not reach host. Check ID or network.";
+                    document.getElementById('home-error').innerText = "Could not reach host. Ensure they are online and check connection.";
                     UI.go('home');
                 }
             }
@@ -766,11 +771,19 @@ const Net = {
             document.getElementById('lobby-status').innerText = "Connected to Host!";
             this.sendToHost('JOIN', { name: this.myName });
             this.monitorConnection(this.hostConn);
+
+            if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = setInterval(() => {
+                if(this.hostConn && this.hostConn.open) {
+                    this.hostConn.send({t: 'PING'});
+                }
+            }, 3000);
         });
 
         this.hostConn.on('data', (data) => this.handleClientMsg(data));
         this.hostConn.on('close', () => { 
             if(resolved) {
+                if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
                 alert("Connection to host lost"); 
                 location.reload(); 
             }
@@ -783,7 +796,7 @@ const Net = {
             this.connections[conn.peer] = conn; 
             this.monitorConnection(conn);
         });
-        conn.on('data', (data) => { this.handleHostMsg(conn.peer, data); });
+        conn.on('data', (data) => { this.handleHostMsg(conn.peer, data, conn); });
         conn.on('close', () => {
             console.log(`Player ${conn.peer} disconnected.`);
             delete this.connections[conn.peer];
@@ -848,6 +861,11 @@ const Net = {
                 alert(msg.d);
                 location.reload();
                 break;
+            case 'PING':
+                this.sendToHost('PONG', {});
+                break;
+            case 'PONG':
+                break;
         }
     },
 
@@ -859,7 +877,7 @@ const Net = {
         }
     },
 
-    handleHostMsg(peerId, msg) {
+    handleHostMsg(peerId, msg, conn) {
         switch(msg.t) {
             case 'JOIN':
                 let redCount = 0, blueCount = 0;
@@ -875,6 +893,11 @@ const Net = {
                 if(Game.running && Game.activePlayers[peerId]) {
                     Game.activePlayers[peerId].input = msg.d;
                 }
+                break;
+            case 'PING':
+                if(conn && conn.open) conn.send({t: 'PONG'});
+                break;
+            case 'PONG':
                 break;
         }
     },
@@ -1219,7 +1242,6 @@ const Game = {
             }
         }
 
-        // Smoothly interpolate joystick output to prevent harsh snapping
         this.joystick.outX += (targetMx - this.joystick.outX) * Math.min(dt * 25, 1);
         this.joystick.outY += (targetMy - this.joystick.outY) * Math.min(dt * 25, 1);
 
@@ -1235,7 +1257,6 @@ const Game = {
 
         if (!Net.isHost) {
             const now = Date.now();
-            // Send input strictly if changed or periodically
             if (Math.abs(mx - this.lastMx) > 0.05 || Math.abs(my - this.lastMy) > 0.05 || now - this.lastInputTime > 50) {
                 Net.sendToHost('PLAYER_INPUT', { mx, my });
                 this.lastMx = mx;
