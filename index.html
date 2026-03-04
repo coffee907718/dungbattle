@@ -1236,7 +1236,7 @@ const Game = {
         if (!Net.isHost) {
             const now = Date.now();
             // Send input strictly if changed or periodically
-            if (Math.abs(mx - this.lastMx) > 0.05 || Math.abs(my - this.lastMy) > 0.05 || now - this.lastInputTime > 16) {
+            if (Math.abs(mx - this.lastMx) > 0.05 || Math.abs(my - this.lastMy) > 0.05 || now - this.lastInputTime > 50) {
                 Net.sendToHost('PLAYER_INPUT', { mx, my });
                 this.lastMx = mx;
                 this.lastMy = my;
@@ -1260,11 +1260,11 @@ const Game = {
                     p.x = Math.max(p.r, Math.min(this.w - p.r, p.x));
                     p.y = Math.max(p.r, Math.min(this.h - p.r, p.y));
 
-                    const correctionLerp = 1 - Math.pow(1 - 0.08, fps60);
+                    const correctionLerp = 1 - Math.pow(1 - 0.15, fps60);
                     p.x += (p.targetX - p.x) * correctionLerp;
                     p.y += (p.targetY - p.y) * correctionLerp;
                 } else {
-                    const pLerp = 1 - Math.pow(1 - 0.8, fps60);
+                    const pLerp = 1 - Math.pow(1 - 0.6, fps60);
                     p.x += (p.targetX - p.x) * pLerp;
                     p.y += (p.targetY - p.y) * pLerp;
                 }
@@ -1392,7 +1392,7 @@ const Game = {
         }
 
         const now = Date.now();
-         if (now - this.lastSyncTime > 16) {
+        if (now - this.lastSyncTime > 40) {
             const state = {
                 b: { x: this.ball.x, y: this.ball.y },
                 p: {}
