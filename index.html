@@ -661,37 +661,37 @@ const Net = {
     heartbeatInterval: null,
     
     cfg: {
-    iceServers: [
-        // Google STUN (multiple)
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
+        iceServers: [
+            // Google STUN (multiple)
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
 
-        // Cloudflare STUN
-        { urls: 'stun:stun.cloudflare.com:3478' },
+            // Cloudflare STUN
+            { urls: 'stun:stun.cloudflare.com:3478' },
 
-        // Twilio STUN
-        { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+            // Twilio STUN
+            { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
 
-        // OpenRelay TURN (UDP + TCP + TLS)
-        {
-            urls: [
-                'turn:openrelay.metered.ca:80',
-                'turn:openrelay.metered.ca:443',
-                'turn:openrelay.metered.ca:443?transport=tcp'
-            ],
-            username: 'openrelayproject',
-            credential: 'openrelayproject'
-        }
-    ],
+            // OpenRelay TURN (UDP + TCP + TLS)
+            {
+                urls: [
+                    'turn:openrelay.metered.ca:80',
+                    'turn:openrelay.metered.ca:443',
+                    'turn:openrelay.metered.ca:443?transport=tcp'
+                ],
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            }
+        ],
 
-    iceTransportPolicy: 'all',        // allow direct + relay
-    bundlePolicy: 'max-bundle',
-    rtcpMuxPolicy: 'require',
-    iceCandidatePoolSize: 10          // pre-generate ICE candidates
-}
+        iceTransportPolicy: 'all',        // allow direct + relay
+        bundlePolicy: 'max-bundle',
+        rtcpMuxPolicy: 'require',
+        iceCandidatePoolSize: 10          // pre-generate ICE candidates
+    },
 
     init(isHost, roomId) {
         this.isHost = isHost;
@@ -736,20 +736,20 @@ const Net = {
         });
 
         this.peer.on('disconnected', () => {
-    console.log("Disconnected. Trying to reconnect...");
+            console.log("Disconnected. Trying to reconnect...");
 
-    if (!this.peer.destroyed) {
-        this.peer.reconnect();
+            if (!this.peer.destroyed) {
+                this.peer.reconnect();
 
-        setTimeout(() => {
-            if (!this.peer.open) {
-                console.log("Recreating peer...");
-                this.peer.destroy();
-                this.init(this.isHost, this.room);
+                setTimeout(() => {
+                    if (!this.peer.open) {
+                        console.log("Recreating peer...");
+                        this.peer.destroy();
+                        this.init(this.isHost, this.room);
+                    }
+                }, 5000);
             }
-        }, 5000);
-    }
-});
+        });
 
         this.peer.on('error', (err) => {
             console.error("PeerJS Error:", err.type, err);
@@ -766,7 +766,7 @@ const Net = {
         });
     },
 
-    connectToHost(hostId, retries = 5, backoff = 1000) {
+    connectToHost(hostId, retries = 5, backoff = 1000, isTurnFallback = false) {
         console.log(`Attempting to connect to host: ${hostId}. Retries left: ${retries}`);
         this.hostConn = this.peer.connect(hostId, { 
             reliable: true,
@@ -781,26 +781,27 @@ const Net = {
                 if (this.hostConn) this.hostConn.close();
                 
                 if (retries > 0) {
-    setTimeout(() => this.connectToHost(hostId, retries - 1, backoff * 1.5), backoff);
-} else {
-    console.warn("Switching to TURN-only mode...");
+                    setTimeout(() => this.connectToHost(hostId, retries - 1, backoff * 1.5, isTurnFallback), backoff);
+                } else if (!isTurnFallback) {
+                    console.warn("Switching to TURN-only mode...");
+                    
+                    this.peer.destroy();
 
-    // Force relay only
-    this.peer.destroy();
+                    setTimeout(() => {
+                        this.peer = new Peer(null, {
+                            config: {
+                                ...this.cfg,
+                                iceTransportPolicy: 'relay'
+                            },
+                            secure: true,
+                            debug: 2
+                        });
 
-    this.peer = new Peer(null, {
-        config: {
-            ...this.cfg,
-            iceTransportPolicy: 'relay'   // FORCE TURN
-        },
-        secure: true,
-        debug: 2
-    });
-
-    this.peer.on('open', () => {
-        this.connectToHost(hostId, 2, 1500);
-    });
-} else {
+                        this.peer.on('open', () => {
+                            this.connectToHost(hostId, 2, 1500, true);
+                        });
+                    }, 500);
+                } else {
                     document.getElementById('home-error').innerText = "Could not reach host. Ensure they are online and check connection.";
                     UI.go('home');
                 }
