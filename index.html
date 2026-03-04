@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="screen-orientation" content="portrait">
     <title>DUNG BATTLE</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
         :root {
             --brown-dark: #3e2723;
@@ -21,17 +20,7 @@
             --card-bg: rgba(225, 203, 185, 0.95);
             --outline: #21100b;
         }
-
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
         html, body {
             font-family: 'Roboto Slab', serif;
             background-color: var(--bg);
@@ -39,447 +28,161 @@
             overflow: hidden;
             touch-action: none;
             overscroll-behavior: none;
-            width: 100vw; 
-            height: 100vh;
-            height: 100dvh;
-            margin: 0;
-            padding: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
+            width: 100vw; height: 100vh; height: 100dvh;
+            margin: 0; padding: 0;
+            position: fixed; top: 0; left: 0;
+            display: flex; justify-content: center; align-items: center;
         }
-
-        #app {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%; 
-            height: 100%;
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-        }
-
+        #app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
         .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%; 
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 300ms ease;
-            opacity: 0;
-            padding: 20px;
-            background-color: var(--bg);
-            z-index: 10;
-            box-sizing: border-box;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 300ms ease; opacity: 0; padding: 20px;
+            background-color: var(--bg); z-index: 10; box-sizing: border-box;
         }
-
-        .screen.active { 
-            display: flex; 
-            opacity: 1; 
-        }
-
+        .screen.active { display: flex; opacity: 1; }
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 30px;
-            border: 4px solid var(--outline);
-            border-radius: 16px;
-            box-shadow: 8px 8px 0px rgba(93, 64, 55, 0.4), 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 420px; 
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            background: var(--card-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 30px; border: 4px solid var(--outline); border-radius: 16px;
+            box-shadow: 8px 8px 0px rgba(93,64,55,0.4), 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center; max-width: 420px; width: 100%; max-height: 90vh;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
-
-        h1 { 
-            font-size: 3.5rem; 
-            font-weight: 900; 
-            margin-bottom: 20px; 
-            color: var(--outline); 
-            letter-spacing: -1px; 
-            line-height: 1; 
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-        }
-        
+        h1 { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; color: var(--outline); letter-spacing: -1px; line-height: 1; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
         input, select {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border: 3px solid var(--outline);
-            border-radius: 10px;
-            font-family: 'Roboto Slab', serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            outline: none;
-            text-align: center;
-            background-color: #efe6dd;
-            color: var(--brown-dark);
-            user-select: auto;
-            -webkit-user-select: auto;
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
+            width: 100%; padding: 14px; margin: 10px 0; border: 3px solid var(--outline);
+            border-radius: 10px; font-family: 'Roboto Slab', serif; font-size: 1.2rem; font-weight: 700;
+            outline: none; text-align: center; background-color: #efe6dd; color: var(--brown-dark);
+            user-select: auto; -webkit-user-select: auto; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
             transition: border-color 0.2s;
         }
-        
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
-
+        input:focus, select:focus { border-color: var(--accent); }
         button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
+            width: 100%; padding: 15px; margin: 10px 0;
             background: linear-gradient(145deg, var(--accent), #f57f17);
-            border: 3px solid var(--outline);
-            border-radius: 10px;
-            font-family: 'Roboto Slab', serif;
-            font-weight: 900;
-            font-size: 1.3rem;
-            cursor: pointer;
-            box-shadow: 4px 4px 0px var(--outline);
-            transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
-            color: var(--outline);
+            border: 3px solid var(--outline); border-radius: 10px;
+            font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 1.3rem;
+            cursor: pointer; box-shadow: 4px 4px 0px var(--outline);
+            transition: transform 0.1s, box-shadow 0.1s, filter 0.1s; color: var(--outline);
         }
-
-        button:hover { 
-            filter: brightness(1.1);
-        }
-        
-        button:active { 
-            transform: translate(3px, 3px); 
-            box-shadow: 1px 1px 0px var(--outline); 
-        }
-        
-        button:disabled { 
-            background: #e0d4c8; 
-            cursor: not-allowed; 
-            box-shadow: none; 
-            transform: none; 
-            border-color: #bcaaa4;
-            color: #8d6e63;
-        }
-
-        .room-display-container {
-            background: #e0d4c8;
-            border: 3px dashed var(--brown-med);
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 10px;
-            box-shadow: inset 2px 2px 8px rgba(0,0,0,0.05);
-        }
-
-        #display-room-id { 
-            font-size: 2.5rem; 
-            font-weight: 900; 
-            color: var(--brown-dark); 
-            display: block; 
-            letter-spacing: 2px;
-        }
-
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0px var(--outline); }
+        button:disabled { background: #e0d4c8; cursor: not-allowed; box-shadow: none; transform: none; border-color: #bcaaa4; color: #8d6e63; }
+        .room-display-container { background: #e0d4c8; border: 3px dashed var(--brown-med); padding: 15px; margin: 20px 0; border-radius: 10px; box-shadow: inset 2px 2px 8px rgba(0,0,0,0.05); }
+        #display-room-id { font-size: 2.5rem; font-weight: 900; color: var(--brown-dark); display: block; letter-spacing: 2px; }
         #game-container {
-            position: absolute;
-            top: 0; 
-            left: 0;
-            width: 100%; 
-            height: 100%;
-            background: var(--brown-dark);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 5;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--brown-dark); display: none; justify-content: center; align-items: center; z-index: 5;
         }
-
-        canvas { 
-            display: block; 
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
-            transform-origin: center center;
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
+        canvas { display: block; transition: transform 0.4s cubic-bezier(0.25,1,0.5,1); transform-origin: center center; max-width: 100%; max-height: 100%; object-fit: contain; }
         .hud {
-            position: absolute;
-            top: max(20px, env(safe-area-inset-top)); 
-            width: 100%;
-            display: flex; 
-            justify-content: space-between;
+            position: absolute; top: max(20px, env(safe-area-inset-top)); width: 100%;
+            display: flex; justify-content: space-between;
             padding: 0 max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
-            pointer-events: none;
-            z-index: 20;
-            flex-direction: row;
-            align-items: center;
+            pointer-events: none; z-index: 20; flex-direction: row; align-items: center;
         }
-
         .score {
-            font-size: 2.2rem; 
-            font-weight: 900; 
-            color: white;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid rgba(255,255,255,0.6); 
-            border-radius: 50%;
-            background-color: var(--outline);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            opacity: 0.85;
+            font-size: 2.2rem; font-weight: 900; color: white; width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            border: 3px solid rgba(255,255,255,0.6); border-radius: 50%;
+            background-color: var(--outline); box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0.85;
         }
-        .score-red { background: linear-gradient(135deg, rgba(211, 47, 47, 0.8), rgba(183, 28, 28, 0.8)); border-color: rgba(255, 138, 128, 0.7); }
-        .score-blue { background: linear-gradient(135deg, rgba(25, 118, 210, 0.8), rgba(13, 71, 161, 0.8)); border-color: rgba(130, 177, 255, 0.7); }
-
+        .score-red { background: linear-gradient(135deg, rgba(211,47,47,0.8), rgba(183,28,28,0.8)); border-color: rgba(255,138,128,0.7); }
+        .score-blue { background: linear-gradient(135deg, rgba(25,118,210,0.8), rgba(13,71,161,0.8)); border-color: rgba(130,177,255,0.7); }
         #joystick-base {
-            position: absolute;
-            display: none;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            z-index: 50;
-            pointer-events: none; 
-            transform: translate(-50%, -50%);
+            position: absolute; display: none; width: 100px; height: 100px;
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; z-index: 50;
+            pointer-events: none; transform: translate(-50%,-50%);
             box-shadow: 0 8px 20px rgba(0,0,0,0.15), inset 0 2px 8px rgba(255,255,255,0.05);
         }
-
         #joystick-stick {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(145deg, #ffffff, #e6e6e6);
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
-            pointer-events: none;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 40px; height: 40px; background: linear-gradient(145deg,#ffffff,#e6e6e6);
+            border: 2px solid rgba(0,0,0,0.1); border-radius: 50%; pointer-events: none;
             box-shadow: 0 5px 10px rgba(0,0,0,0.2), inset -2px -2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.1s cubic-bezier(0.2,0.8,0.2,1);
         }
-
         #overlay {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background: rgba(33, 16, 11, 0.85);
-            backdrop-filter: blur(5px);
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            z-index: 100;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(33,16,11,0.85); backdrop-filter: blur(5px);
+            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
         }
-        
         #instruction-popup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 4px solid var(--outline);
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: var(--brown-dark);
-            z-index: 80;
-            display: none;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            width: 85%;
-            max-width: 420px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%) scale(0.9);
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            border: 4px solid var(--outline); border-radius: 16px;
+            padding: 30px; text-align: center; font-size: 2.2rem; font-weight: 900;
+            color: var(--brown-dark); z-index: 80; display: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 85%; max-width: 420px;
+            pointer-events: none; opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
         }
-
-        #instruction-popup.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
+        #instruction-popup.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
         .status-msg { margin: 10px 0; font-weight: 700; color: #43a047; font-size: 1.1rem; }
         .error-msg { color: #d32f2f; font-weight: 700; margin-top: 10px; font-size: 1.1rem; }
-        
+        .connecting-msg { color: #1565c0; font-weight: 700; margin-top: 10px; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 18px; height: 18px; border: 3px solid #bbdefb; border-top-color: #1565c0; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; flex-shrink: 0; }
         .fs-btn, .sound-btn {
-            position: fixed; 
-            right: max(15px, env(safe-area-inset-right));
-            width: 45px; 
-            height: 45px;
-            background: transparent;
-            border: none;
-            z-index: 200; 
-            cursor: pointer;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+            position: fixed; right: max(15px, env(safe-area-inset-right));
+            width: 45px; height: 45px; background: transparent; border: none;
+            z-index: 200; cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: transform 0.1s;
         }
-        
-        .fs-btn svg, .sound-btn svg {
-            filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4));
-            stroke: rgba(255,255,255,0.9);
-        }
-
+        .fs-btn svg, .sound-btn svg { filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.4)); stroke: rgba(255,255,255,0.9); }
         .sound-btn { top: max(75px, calc(env(safe-area-inset-top) + 60px)); }
-        
-        .fs-btn { 
-            top: max(15px, env(safe-area-inset-top)); 
-            background: rgba(244, 143, 177, 0.45); 
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        .fs-btn {
+            top: max(15px, env(safe-area-inset-top));
+            background: rgba(244,143,177,0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .fs-btn svg {
-            stroke: var(--brown-dark);
-            filter: none;
-        }
-        
-        .fs-btn:active, .sound-btn:active { 
-            transform: scale(0.9);
-        }
-
+        .fs-btn svg { stroke: var(--brown-dark); filter: none; }
+        .fs-btn:active, .sound-btn:active { transform: scale(0.9); }
         .fs-tooltip {
-            position: fixed;
-            top: max(22px, calc(env(safe-area-inset-top) + 7px));
+            position: fixed; top: max(22px, calc(env(safe-area-inset-top) + 7px));
             right: max(65px, calc(env(safe-area-inset-right) + 50px));
-            background: rgba(33, 16, 11, 0.85);
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            pointer-events: none;
-            z-index: 199;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            opacity: 1;
-            transform: translateX(0);
-            animation: fadeOutTooltip 4s forwards;
-            animation-delay: 2s;
+            background: rgba(33,16,11,0.85); color: #fff; padding: 6px 12px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 700; pointer-events: none; z-index: 199;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); opacity: 1; transform: translateX(0);
+            animation: fadeOutTooltip 4s forwards; animation-delay: 2s;
         }
-
         .fs-tooltip::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: -5px;
-            transform: translateY(-50%);
-            border-width: 5px 0 5px 5px;
-            border-style: solid;
-            border-color: transparent transparent transparent rgba(33, 16, 11, 0.85);
+            content: ''; position: absolute; top: 50%; right: -5px; transform: translateY(-50%);
+            border-width: 5px 0 5px 5px; border-style: solid; border-color: transparent transparent transparent rgba(33,16,11,0.85);
         }
-
-        @keyframes fadeOutTooltip {
-            0% { opacity: 1; transform: translateX(0); }
-            100% { opacity: 0; transform: translateX(15px); visibility: hidden; }
-        }
-        
+        @keyframes fadeOutTooltip { 0% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(15px); visibility: hidden; } }
         .lobby-team-control {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            background: #fdfaf7;
-            border: 2px solid #e0d4c8;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; padding: 10px 12px; border-radius: 8px;
+            background: #fdfaf7; border: 2px solid #e0d4c8; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
-        
-        .team-btn {
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            margin: 0 3px;
-            width: auto;
-            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-        }
-        
+        .team-btn { padding: 6px 12px; font-size: 0.9rem; margin: 0 3px; width: auto; box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
         .team-btn.red { background: #ffebee; border-color: #d32f2f; color: #d32f2f; }
         .team-btn.blue { background: #e3f2fd; border-color: #1976d2; color: #1976d2; }
-
         #exit-dialog {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999;
         }
-
         .exit-card {
-            background: var(--card-bg);
-            padding: 30px;
-            border: 4px solid var(--outline);
-            border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 350px;
-            width: 90%;
+            background: var(--card-bg); padding: 30px; border: 4px solid var(--outline);
+            border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center; max-width: 350px; width: 90%;
         }
-
-        .exit-card h2 {
-            font-size: 1.8rem;
-            color: var(--brown-dark);
-            margin-bottom: 25px;
-        }
-
-        .exit-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .exit-buttons button {
-            margin: 0;
-            flex: 1;
-            font-size: 1.1rem;
-            padding: 12px;
-            box-shadow: 2px 2px 0px var(--outline);
-        }
-
+        .exit-card h2 { font-size: 1.8rem; color: var(--brown-dark); margin-bottom: 25px; }
+        .exit-buttons { display: flex; gap: 15px; justify-content: center; }
+        .exit-buttons button { margin: 0; flex: 1; font-size: 1.1rem; padding: 12px; box-shadow: 2px 2px 0px var(--outline); }
         #btn-exit-cancel { background: linear-gradient(145deg, #f5eadd, #d6c6b7); color: #333; }
         #btn-exit-ok { background: linear-gradient(145deg, var(--player-red), #b71c1c); color: white; border-color: #8e0000; }
-
         @media screen and (orientation: landscape) {
             body::before {
                 content: "Please rotate your device to portrait mode";
-                position: fixed;
-                inset: 0;
-                background: var(--outline);
-                color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 24px;
-                font-weight: bold;
-                z-index: 9999;
-                text-align: center;
-                padding: 20px;
+                position: fixed; inset: 0; background: var(--outline); color: white;
+                display: flex; justify-content: center; align-items: center;
+                font-size: 24px; font-weight: bold; z-index: 9999; text-align: center; padding: 20px;
             }
         }
     </style>
@@ -499,35 +202,34 @@
             <h1>DUNG BATTLE</h1>
             <input type="text" id="input-name" placeholder="YOUR NAME" maxlength="12" autocomplete="off">
             <button id="btn-create">CREATE ROOM</button>
-            <div style="font-weight: 900; margin: 20px 0; color: var(--brown-med); opacity: 0.7;">━ OR ━</div>
+            <div style="font-weight:900;margin:20px 0;color:var(--brown-med);opacity:0.7;">━ OR ━</div>
             <input type="text" id="input-room-id" placeholder="6-DIGIT ID" maxlength="6" autocomplete="off">
             <button id="btn-join">JOIN ROOM</button>
             <div id="home-error" class="error-msg"></div>
+            <div id="home-connecting" class="connecting-msg" style="display:none;"><div class="spinner"></div><span id="home-connect-text">Connecting...</span></div>
         </div>
     </div>
 
     <div id="screen-lobby" class="screen">
         <div class="card">
-            <h2 style="font-size: 1.2rem; color: var(--brown-med);">ROOM ID</h2>
+            <h2 style="font-size:1.2rem;color:var(--brown-med);">ROOM ID</h2>
             <div class="room-display-container">
                 <span id="display-room-id">------</span>
             </div>
-            <button id="btn-copy" style="font-size: 0.9rem; padding: 10px; width: 160px; margin: 0 auto 20px;">COPY ID</button>
-            
-            <div id="host-controls" style="display: none; margin-bottom: 20px; padding-top: 15px; border-top: 2px dashed #bcaaa4;">
-                <label style="font-weight: bold; font-size: 0.9rem; color: var(--brown-med);">POINTS TO WIN:</label>
-                <select id="win-points-select" style="padding: 10px; font-size: 1rem; margin-top: 8px;">
+            <button id="btn-copy" style="font-size:0.9rem;padding:10px;width:160px;margin:0 auto 20px;">COPY ID</button>
+            <div id="host-controls" style="display:none;margin-bottom:20px;padding-top:15px;border-top:2px dashed #bcaaa4;">
+                <label style="font-weight:bold;font-size:0.9rem;color:var(--brown-med);">POINTS TO WIN:</label>
+                <select id="win-points-select" style="padding:10px;font-size:1rem;margin-top:8px;">
                     <option value="3">3 Points</option>
                     <option value="5" selected>5 Points</option>
                     <option value="7">7 Points</option>
                     <option value="10">10 Points</option>
                 </select>
             </div>
-
-            <div id="player-list" style="text-align: left; background: #e5d7c8; padding: 12px; border-radius: 10px; border: 2px solid #e0d4c8; min-height: 150px; max-height: 250px; overflow-y: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-                </div>
+            <div id="player-list" style="text-align:left;background:#e5d7c8;padding:12px;border-radius:10px;border:2px solid #e0d4c8;min-height:150px;max-height:250px;overflow-y:auto;box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);"></div>
             <div id="lobby-status" class="status-msg">Waiting...</div>
-            <button id="btn-start" disabled style="display: none; background: linear-gradient(145deg, #4caf50, #2e7d32); color: white; border-color: #1b5e20;">START BATTLE</button>
+            <div id="lobby-connecting" class="connecting-msg" style="display:none;"><div class="spinner"></div><span id="lobby-connect-text">Connecting to host...</span></div>
+            <button id="btn-start" disabled style="display:none;background:linear-gradient(145deg,#4caf50,#2e7d32);color:white;border-color:#1b5e20;">START BATTLE</button>
         </div>
     </div>
 
@@ -536,19 +238,12 @@
             <div id="score-red" class="score score-red">0</div>
             <div id="score-blue" class="score score-blue">0</div>
         </div>
-        
         <canvas id="gameCanvas"></canvas>
-        
-        <div id="joystick-base">
-            <div id="joystick-stick"></div>
-        </div>
-
+        <div id="joystick-base"><div id="joystick-stick"></div></div>
         <div id="instruction-popup"></div>
-
         <div id="overlay">
-            <h1 id="win-text" style="color: white; font-size: 4.5rem; margin-bottom: 40px; text-align: center; text-shadow: 0 10px 20px rgba(0,0,0,0.5);"></h1>
-            <div style="width: 300px;" id="post-game-controls">
-                </div>
+            <h1 id="win-text" style="color:white;font-size:4.5rem;margin-bottom:40px;text-align:center;text-shadow:0 10px 20px rgba(0,0,0,0.5);"></h1>
+            <div style="width:300px;" id="post-game-controls"></div>
         </div>
     </div>
 
@@ -564,9 +259,10 @@
 </div>
 
 <script>
-document.addEventListener('contextmenu', event => event.preventDefault());
-document.addEventListener('dblclick', event => event.preventDefault(), { passive: false });
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
 
+/* ─── AUDIO ─── */
 const AudioSystem = {
     sounds: [
         'https://www.myinstants.com/media/sounds/tudum-tedev.mp3',
@@ -575,311 +271,321 @@ const AudioSystem = {
         'https://www.myinstants.com/media/sounds/ab-tu-gaya-beta-ab-dekh-tu-puneet.mp3',
         'https://www.myinstants.com/media/sounds/hacker-hai-bhai-hacker-ajjubhai.mp3'
     ],
-    players: [],
-    currentAudio: null,
-    isGoalMuted: false, 
-    audioCtx: null,
-    
-    init() {
-        this.sounds.forEach(src => {
-            const audio = new Audio(src);
-            audio.load();
-            this.players.push(audio);
-        });
-    },
-    
+    players: [], currentAudio: null, isGoalMuted: false, audioCtx: null,
+    init() { this.sounds.forEach(src => { const a = new Audio(src); a.load(); this.players.push(a); }); },
     playSequential(turn) {
-        if (this.isGoalMuted) return;
-        
-        if (this.currentAudio) {
-            this.currentAudio.pause();
-            this.currentAudio.currentTime = 0;
-        }
-
-        if (this.players.length === 0) return;
-
-        const index = turn % this.players.length;
-        const audio = this.players[index];
-        
-        this.currentAudio = audio;
-        audio.currentTime = 0;
-        audio.play().catch(() => {});
+        if (this.isGoalMuted || !this.players.length) return;
+        if (this.currentAudio) { this.currentAudio.pause(); this.currentAudio.currentTime = 0; }
+        const audio = this.players[turn % this.players.length];
+        this.currentAudio = audio; audio.currentTime = 0; audio.play().catch(() => {});
     },
-
     playBallHit(intensity) {
         if (this.isGoalMuted) return;
         try {
-            if (!this.audioCtx) {
-                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const ctx = this.audioCtx;
             if (ctx.state === 'suspended') ctx.resume();
-
-            const osc = ctx.createOscillator();
-            const gainNode = ctx.createGain();
-
-            const vol = Math.max(0.02, Math.min(0.5, intensity * 0.5)); 
-            const startFreq = 80 + (vol * 150); 
-
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            const vol = Math.max(0.02, Math.min(0.5, intensity * 0.5));
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
+            osc.frequency.setValueAtTime(80 + vol * 150, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.1);
-
-            gainNode.gain.setValueAtTime(vol, ctx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-
-            osc.connect(gainNode);
-            gainNode.connect(ctx.destination);
-
-            osc.start();
-            osc.stop(ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(vol, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.1);
         } catch(e) {}
     },
-
     toggleMute() {
         this.isGoalMuted = !this.isGoalMuted;
-        const btn = document.getElementById('btn-sound');
-        if (this.isGoalMuted) {
-            btn.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
-        } else {
-            btn.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
-        }
+        document.getElementById('btn-sound').innerHTML = this.isGoalMuted
+            ? `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`
+            : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
     }
 };
 
+/* ─── NETWORK ─── */
 const Net = {
     peer: null,
-    connections: {}, 
-    hostConn: null,  
+    connections: {},
+    hostConn: null,
     isHost: false,
     myId: null,
     room: null,
     myName: '',
-    players: {}, 
+    players: {},
     maxScore: 5,
-    ROOM_PREFIX: "DUNGBTL-",
-    heartbeatInterval: null,
-    
+    ROOM_PREFIX: 'DNGBTL',
+    _heartbeat: null,
+    _retryTimer: null,
+    _connAborted: false,
+
+    /* ── ICE config with multiple STUN + two free TURN layers ── */
     cfg: {
         iceServers: [
-            // Google STUN (multiple)
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             { urls: 'stun:stun2.l.google.com:19302' },
             { urls: 'stun:stun3.l.google.com:19302' },
             { urls: 'stun:stun4.l.google.com:19302' },
-
-            // Cloudflare STUN
             { urls: 'stun:stun.cloudflare.com:3478' },
-
-            // Twilio STUN
-            { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-
-            // OpenRelay TURN (UDP + TCP + TLS)
+            { urls: 'stun:global.stun.twilio.com:3478' },
+            /* OpenRelay – free, no account needed */
             {
                 urls: [
                     'turn:openrelay.metered.ca:80',
                     'turn:openrelay.metered.ca:443',
-                    'turn:openrelay.metered.ca:443?transport=tcp'
+                    'turn:openrelay.metered.ca:443?transport=tcp',
+                    'turns:openrelay.metered.ca:443'
                 ],
                 username: 'openrelayproject',
                 credential: 'openrelayproject'
+            },
+            /* freeturn.net – second free TURN for extra reliability */
+            {
+                urls: [
+                    'turn:freeturn.net:3479',
+                    'turns:freeturn.net:5350'
+                ],
+                username: 'free',
+                credential: 'free'
             }
         ],
-
-        iceTransportPolicy: 'all',        // allow direct + relay
+        iceTransportPolicy: 'all',
         bundlePolicy: 'max-bundle',
         rtcpMuxPolicy: 'require',
-        iceCandidatePoolSize: 10          // pre-generate ICE candidates
+        iceCandidatePoolSize: 10
     },
 
-    init(isHost, roomId) {
-        this.isHost = isHost;
-        this.myName = document.getElementById('input-name').value.trim() || (isHost ? "Host" : `Player_${Math.floor(Math.random()*100)}`);
-        
-        const peerId = isHost ? (this.ROOM_PREFIX + roomId) : `GUEST-${Math.floor(Math.random() * 9999999)}`;
-        this.peer = new Peer(peerId, { 
-            config: this.cfg,
-            debug: 2,
-            secure: true,
-            pingInterval: 5000 
-        });
+    /* ── helpers ── */
+    _setLobbyStatus(msg, spinner = false) {
+        const s = document.getElementById('lobby-status');
+        const c = document.getElementById('lobby-connecting');
+        const t = document.getElementById('lobby-connect-text');
+        if (spinner) { s.style.display = 'none'; c.style.display = 'flex'; t.textContent = msg; }
+        else { s.style.display = ''; c.style.display = 'none'; s.textContent = msg; }
+    },
+    _setHomeConnecting(msg) {
+        document.getElementById('home-error').textContent = '';
+        const c = document.getElementById('home-connecting');
+        const t = document.getElementById('home-connect-text');
+        c.style.display = msg ? 'flex' : 'none';
+        if (msg) t.textContent = msg;
+    },
+    _setHomeError(msg) {
+        document.getElementById('home-connecting').style.display = 'none';
+        document.getElementById('home-error').textContent = msg;
+        document.getElementById('btn-create').disabled = false;
+        document.getElementById('btn-join').disabled = false;
+    },
 
-        this.peer.on('open', (id) => {
-            this.myId = id;
-            this.room = roomId; 
-            
-            UI.go('lobby');
-            document.getElementById('display-room-id').innerText = this.room;
-            
-            if (isHost) {
-                document.getElementById('lobby-status').innerText = "Waiting for players...";
+    /* ── create Peer object ── */
+    _makePeer(id, onOpen) {
+        if (this.peer) { try { this.peer.destroy(); } catch(e) {} }
+        this.peer = new Peer(id || undefined, {
+            config: this.cfg,
+            debug: 0,
+            secure: true,
+            pingInterval: 4000
+        });
+        this.peer.on('open', id => { this.myId = id; onOpen(id); });
+        this.peer.on('error', err => this._onPeerError(err));
+        this.peer.on('disconnected', () => {
+            console.warn('PeerJS broker disconnected – reconnecting…');
+            if (!this.peer.destroyed) {
+                setTimeout(() => { try { this.peer.reconnect(); } catch(e) {} }, 1000);
+            }
+        });
+    },
+
+    /* ── public: start as host ── */
+    init(isHost, roomId) {
+        this._connAborted = false;
+        this.isHost = isHost;
+        this.myName = (document.getElementById('input-name').value.trim() || (isHost ? 'Host' : 'Player' + (Math.random()*99|0)));
+
+        document.getElementById('btn-create').disabled = true;
+        document.getElementById('btn-join').disabled = true;
+        this._setHomeConnecting('Creating room…');
+
+        if (isHost) {
+            this.room = roomId;
+            const peerId = this.ROOM_PREFIX + roomId;
+            this._makePeer(peerId, () => {
+                this._setHomeConnecting('');
+                document.getElementById('btn-create').disabled = false;
+                document.getElementById('btn-join').disabled = false;
+                UI.go('lobby');
+                document.getElementById('display-room-id').textContent = this.room;
                 document.getElementById('host-controls').style.display = 'block';
                 document.getElementById('btn-start').style.display = 'block';
-                
-                this.players[id] = { name: this.myName, team: 'red', isHost: true };
+                this.players[this.myId] = { name: this.myName, team: 'red', isHost: true };
                 this.updateLobbyUI();
-            } else {
-                document.getElementById('lobby-status').innerText = "Connecting to host...";
-                this.connectToHost(this.ROOM_PREFIX + roomId);
-            }
-        });
-
-        this.peer.on('connection', (conn) => {
-            if (!this.isHost) { conn.close(); return; }
-            if (Object.keys(this.connections).length >= 7) {
-                conn.send({ t: 'ERROR', d: 'Room is full' });
-                setTimeout(() => conn.close(), 500);
-                return;
-            }
-            this.setupHostConnection(conn);
-        });
-
-        this.peer.on('disconnected', () => {
-            console.log("Disconnected. Trying to reconnect...");
-
-            if (!this.peer.destroyed) {
-                this.peer.reconnect();
-
-                setTimeout(() => {
-                    if (!this.peer.open) {
-                        console.log("Recreating peer...");
-                        this.peer.destroy();
-                        this.init(this.isHost, this.room);
-                    }
-                }, 5000);
-            }
-        });
-
-        this.peer.on('error', (err) => {
-            console.error("PeerJS Error:", err.type, err);
-            if (err.type === 'peer-unavailable') {
-                document.getElementById('home-error').innerText = "Room not found. Check ID.";
-                if (!document.getElementById('screen-home').classList.contains('active')) UI.go('home');
-            } else if (err.type === 'network' || err.type === 'server-error') {
-                document.getElementById('lobby-status').innerText = "Network Error. Reconnecting...";
-                setTimeout(() => { if (!this.peer.destroyed) this.peer.reconnect(); }, 2000);
-            } else {
-                document.getElementById('home-error').innerText = "Error: " + err.type;
-                if (!document.getElementById('screen-home').classList.contains('active')) UI.go('home');
-            }
-        });
-    },
-
-    connectToHost(hostId, retries = 5, backoff = 1000, isTurnFallback = false) {
-        console.log(`Attempting to connect to host: ${hostId}. Retries left: ${retries}`);
-        this.hostConn = this.peer.connect(hostId, { 
-            reliable: true,
-            serialization: 'json'
-        }); 
-        
-        let resolved = false;
-
-        const connTimeout = setTimeout(() => {
-            if (!resolved) {
-                console.warn("Connection timeout to host.");
-                if (this.hostConn) this.hostConn.close();
-                
-                if (retries > 0) {
-                    setTimeout(() => this.connectToHost(hostId, retries - 1, backoff * 1.5, isTurnFallback), backoff);
-                } else if (!isTurnFallback) {
-                    console.warn("Switching to TURN-only mode...");
-                    
-                    this.peer.destroy();
-
-                    setTimeout(() => {
-                        this.peer = new Peer(null, {
-                            config: {
-                                ...this.cfg,
-                                iceTransportPolicy: 'relay'
-                            },
-                            secure: true,
-                            debug: 2
-                        });
-
-                        this.peer.on('open', () => {
-                            this.connectToHost(hostId, 2, 1500, true);
-                        });
-                    }, 500);
-                } else {
-                    document.getElementById('home-error').innerText = "Could not reach host. Ensure they are online and check connection.";
-                    UI.go('home');
-                }
-            }
-        }, 8000);
-
-        this.hostConn.on('open', () => {
-            resolved = true;
-            clearTimeout(connTimeout);
-            document.getElementById('lobby-status').innerText = "Connected to Host!";
-            this.sendToHost('JOIN', { name: this.myName });
-            this.monitorConnection(this.hostConn);
-
-            if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-            this.heartbeatInterval = setInterval(() => {
-                if(this.hostConn && this.hostConn.open) {
-                    this.hostConn.send({t: 'PING'});
-                }
-            }, 3000);
-        });
-
-        this.hostConn.on('data', (data) => this.handleClientMsg(data));
-        this.hostConn.on('close', () => { 
-            if(resolved) {
-                if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-                alert("Connection to host lost"); 
-                location.reload(); 
-            }
-        });
-        this.hostConn.on('error', (err) => console.error("Host connection error:", err));
-    },
-
-    setupHostConnection(conn) {
-        conn.on('open', () => { 
-            this.connections[conn.peer] = conn; 
-            this.monitorConnection(conn);
-        });
-        conn.on('data', (data) => { this.handleHostMsg(conn.peer, data, conn); });
-        conn.on('close', () => {
-            console.log(`Player ${conn.peer} disconnected.`);
-            delete this.connections[conn.peer];
-            delete this.players[conn.peer];
-            if (Game.running) delete Game.activePlayers[conn.peer];
-            this.broadcastLobbyState();
-        });
-        conn.on('error', (err) => {
-            console.error(`Connection error with ${conn.peer}:`, err);
-        });
-    },
-
-    monitorConnection(conn) {
-        if (!conn || !conn.peerConnection) return;
-        const pc = conn.peerConnection;
-        
-        pc.onconnectionstatechange = () => {
-            console.log(`Connection state (${conn.peer}):`, pc.connectionState);
-            if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
-                console.warn(`WebRTC connection lost with ${conn.peer}`);
-                conn.close(); 
-            }
-        };
-
-        pc.oniceconnectionstatechange = () => {
-            console.log(`ICE state (${conn.peer}):`, pc.iceConnectionState);
-            if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
-                console.warn(`ICE connection failed with ${conn.peer}`);
-            }
-        };
-    },
-
-    sendToHost(type, data) {
-        if (this.hostConn && this.hostConn.open) {
-            this.hostConn.send({ t: type, d: data });
+                this._setLobbyStatus('Waiting for players…');
+                /* listen for guests */
+                this.peer.on('connection', conn => this._onGuestConnect(conn));
+            });
+        } else {
+            this.room = roomId;
+            this._makePeer(null, () => {
+                this._setHomeConnecting('');
+                document.getElementById('btn-create').disabled = false;
+                document.getElementById('btn-join').disabled = false;
+                UI.go('lobby');
+                document.getElementById('display-room-id').textContent = this.room;
+                this._connectToHost(this.ROOM_PREFIX + roomId);
+            });
         }
     },
 
-    handleClientMsg(msg) {
-        switch(msg.t) {
+    /* ── guest: connect to host with retry ── */
+    _connectToHost(hostPeerId, attempt = 1, maxAttempts = 6) {
+        if (this._connAborted) return;
+        this._setLobbyStatus(`Connecting… (${attempt}/${maxAttempts})`, true);
+
+        /* close any existing data conn */
+        if (this.hostConn) { try { this.hostConn.close(); } catch(e) {} this.hostConn = null; }
+
+        const conn = this.peer.connect(hostPeerId, { reliable: true, serialization: 'json' });
+        this.hostConn = conn;
+        let opened = false;
+
+        const timeout = setTimeout(() => {
+            if (!opened) {
+                console.warn(`Attempt ${attempt} timed out.`);
+                try { conn.close(); } catch(e) {}
+                if (attempt < maxAttempts) {
+                    const delay = Math.min(1000 * attempt, 5000);
+                    this._retryTimer = setTimeout(() => this._connectToHost(hostPeerId, attempt + 1, maxAttempts), delay);
+                } else {
+                    /* final fallback: force TURN-relay only */
+                    if (attempt === maxAttempts) {
+                        this._connectViaTurnOnly(hostPeerId);
+                    } else {
+                        this._setHomeError('Cannot reach host. Make sure they have the room open, then try again.');
+                        UI.go('home');
+                    }
+                }
+            }
+        }, 10000);
+
+        conn.on('open', () => {
+            opened = true;
+            clearTimeout(timeout);
+            this._setLobbyStatus('✅ Connected!');
+            this.sendToHost('JOIN', { name: this.myName });
+            this._startHeartbeat();
+            this._monitorConn(conn, false);
+        });
+
+        conn.on('data', d => this._handleClientMsg(d));
+
+        conn.on('close', () => {
+            if (opened) {
+                this._stopHeartbeat();
+                alert('Connection to host lost. Returning to menu…');
+                location.reload();
+            }
+        });
+
+        conn.on('error', err => console.error('dataconn error', err));
+    },
+
+    /* last-resort: new peer with relay-only ICE */
+    _connectViaTurnOnly(hostPeerId) {
+        this._setLobbyStatus('Trying relay connection…', true);
+        if (this.peer) { try { this.peer.destroy(); } catch(e) {} }
+
+        this.peer = new Peer(undefined, {
+            config: { ...this.cfg, iceTransportPolicy: 'relay' },
+            debug: 0, secure: true, pingInterval: 4000
+        });
+        this.peer.on('open', id => {
+            this.myId = id;
+            this._connectToHost(hostPeerId, 1, 3);
+        });
+        this.peer.on('error', err => this._onPeerError(err));
+    },
+
+    /* ── host: handle incoming guest ── */
+    _onGuestConnect(conn) {
+        if (Object.keys(this.connections).length >= 7) {
+            conn.send({ t: 'ERROR', d: 'Room is full' });
+            setTimeout(() => conn.close(), 500); return;
+        }
+        conn.on('open', () => {
+            this.connections[conn.peer] = conn;
+            this._monitorConn(conn, true);
+        });
+        conn.on('data', d => this._handleHostMsg(conn.peer, d, conn));
+        conn.on('close', () => {
+            delete this.connections[conn.peer];
+            delete this.players[conn.peer];
+            if (Game.running) delete Game.activePlayers[conn.peer];
+            this._broadcastLobbyState();
+        });
+        conn.on('error', err => console.error('guest conn err', err));
+    },
+
+    /* ── monitor WebRTC underneath ── */
+    _monitorConn(conn, isHostSide) {
+        const pc = conn.peerConnection;
+        if (!pc) return;
+        pc.onconnectionstatechange = () => {
+            const s = pc.connectionState;
+            if (s === 'failed') {
+                console.warn('WebRTC connection failed – attempting ICE restart');
+                try { pc.restartIce(); } catch(e) {}
+            }
+            if (s === 'disconnected') {
+                setTimeout(() => {
+                    if (pc.connectionState === 'disconnected') {
+                        console.warn('Still disconnected after 3 s – closing');
+                        conn.close();
+                    }
+                }, 3000);
+            }
+        };
+    },
+
+    /* ── heartbeat (guest → host) ── */
+    _startHeartbeat() {
+        this._stopHeartbeat();
+        this._heartbeat = setInterval(() => {
+            if (this.hostConn && this.hostConn.open) this.hostConn.send({ t: 'PING' });
+        }, 3000);
+    },
+    _stopHeartbeat() { clearInterval(this._heartbeat); this._heartbeat = null; },
+
+    /* ── peer-level error ── */
+    _onPeerError(err) {
+        console.error('PeerJS error', err.type, err);
+        if (err.type === 'peer-unavailable') {
+            this._setHomeError('Room not found. Double-check the 6-digit ID.');
+            if (!document.getElementById('screen-home').classList.contains('active')) UI.go('home');
+        } else if (err.type === 'unavailable-id') {
+            /* host ID clash – rare but retry with slight delay */
+            setTimeout(() => this.init(true, this.room), 1500);
+        } else if (err.type === 'network' || err.type === 'server-error') {
+            this._setLobbyStatus('Network issue, retrying…', true);
+            setTimeout(() => { if (!this.peer.destroyed) this.peer.reconnect(); }, 2000);
+        }
+    },
+
+    /* ── send helpers ── */
+    sendToHost(type, data) {
+        if (this.hostConn && this.hostConn.open) this.hostConn.send({ t: type, d: data });
+    },
+    broadcast(type, data, excludeId = null) {
+        for (const pid in this.connections) {
+            if (pid !== excludeId && this.connections[pid].open)
+                this.connections[pid].send({ t: type, d: data });
+        }
+    },
+
+    /* ── message handlers ── */
+    _handleClientMsg(msg) {
+        switch (msg.t) {
             case 'LOBBY_STATE':
                 this.players = msg.d.players;
                 this.maxScore = msg.d.maxScore;
@@ -889,9 +595,7 @@ const Net = {
                 this.maxScore = msg.d.maxScore;
                 Game.begin(msg.d.players);
                 break;
-            case 'GAME_STATE':
-                Game.remoteSync(msg.d);
-                break;
+            case 'GAME_STATE': Game.remoteSync(msg.d); break;
             case 'GOAL':
                 Game.gameScore = msg.d.score;
                 Game.goalEffect(msg.d.team);
@@ -900,93 +604,70 @@ const Net = {
                 Game.gameScore = msg.d.score;
                 Game.endGame(msg.d.winner);
                 break;
-            case 'ERROR':
-                alert(msg.d);
-                location.reload();
-                break;
-            case 'PING':
-                this.sendToHost('PONG', {});
-                break;
-            case 'PONG':
-                break;
+            case 'ERROR': alert(msg.d); location.reload(); break;
+            case 'PING': this.sendToHost('PONG', {}); break;
+            case 'PONG': break;
         }
     },
 
-    broadcast(type, data, excludePeerId = null) {
-        for (let peerId in this.connections) {
-            if (peerId !== excludePeerId && this.connections[peerId].open) {
-                this.connections[peerId].send({ t: type, d: data });
+    _handleHostMsg(peerId, msg, conn) {
+        switch (msg.t) {
+            case 'JOIN': {
+                let r = 0, b = 0;
+                for (const id in this.players) this.players[id].team === 'red' ? r++ : b++;
+                this.players[peerId] = { name: msg.d.name, team: r <= b ? 'red' : 'blue', isHost: false };
+                this._broadcastLobbyState();
+                break;
             }
-        }
-    },
-
-    handleHostMsg(peerId, msg, conn) {
-        switch(msg.t) {
-            case 'JOIN':
-                let redCount = 0, blueCount = 0;
-                for(let id in this.players) {
-                    if(this.players[id].team === 'red') redCount++;
-                    else blueCount++;
-                }
-                const team = redCount <= blueCount ? 'red' : 'blue';
-                this.players[peerId] = { name: msg.d.name, team: team, isHost: false };
-                this.broadcastLobbyState();
-                break;
             case 'PLAYER_INPUT':
-                if(Game.running && Game.activePlayers[peerId]) {
+                if (Game.running && Game.activePlayers[peerId])
                     Game.activePlayers[peerId].input = msg.d;
-                }
                 break;
-            case 'PING':
-                if(conn && conn.open) conn.send({t: 'PONG'});
-                break;
-            case 'PONG':
-                break;
+            case 'PING': if (conn && conn.open) conn.send({ t: 'PONG' }); break;
+            case 'PONG': break;
         }
     },
 
-    broadcastLobbyState() {
+    /* ── lobby helpers ── */
+    _broadcastLobbyState() {
         if (!this.isHost) return;
         this.updateLobbyUI();
-        this.broadcast('LOBBY_STATE', { 
+        this.broadcast('LOBBY_STATE', {
             players: this.players,
             maxScore: parseInt(document.getElementById('win-points-select').value)
         });
         document.getElementById('btn-start').disabled = Object.keys(this.players).length < 2;
     },
 
-    changeTeam(playerId, newTeam) {
+    changeTeam(playerId, team) {
         if (!this.isHost || !this.players[playerId]) return;
-        this.players[playerId].team = newTeam;
-        this.broadcastLobbyState();
+        this.players[playerId].team = team;
+        this._broadcastLobbyState();
     },
 
     updateLobbyUI() {
         const list = document.getElementById('player-list');
         list.innerHTML = '';
-        
-        for (let id in this.players) {
+        for (const id in this.players) {
             const p = this.players[id];
             const div = document.createElement('div');
             div.className = 'lobby-team-control';
-            
-            let html = `<span style="font-weight:700; color: ${p.team === 'red' ? '#d32f2f' : '#1976d2'}; text-transform: uppercase;">
-                ${p.team === 'red' ? '🔴' : '🔵'} ${p.name} ${p.isHost ? '(HOST)' : ''} ${id === this.myId ? '(YOU)' : ''}
+            let html = `<span style="font-weight:700;color:${p.team==='red'?'#d32f2f':'#1976d2'};text-transform:uppercase;">
+                ${p.team==='red'?'🔴':'🔵'} ${p.name} ${p.isHost?'(HOST)':''} ${id===this.myId?'(YOU)':''}
             </span>`;
-            
             if (this.isHost) {
                 html += `<div>
-                    <button class="team-btn red" onclick="Net.changeTeam('${id}', 'red')">RED</button>
-                    <button class="team-btn blue" onclick="Net.changeTeam('${id}', 'blue')">BLUE</button>
+                    <button class="team-btn red" onclick="Net.changeTeam('${id}','red')">RED</button>
+                    <button class="team-btn blue" onclick="Net.changeTeam('${id}','blue')">BLUE</button>
                 </div>`;
             }
-            
             div.innerHTML = html;
             list.appendChild(div);
         }
     }
 };
 
+/* ─── UI ─── */
 const UI = {
     go(id) {
         document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
@@ -994,230 +675,146 @@ const UI = {
         if (id === 'game') {
             document.getElementById('game-container').style.display = 'flex';
         } else {
-            const target = document.getElementById('screen-' + id);
-            target.style.display = 'flex';
-            setTimeout(() => target.classList.add('active'), 50);
+            const t = document.getElementById('screen-' + id);
+            t.style.display = 'flex';
+            setTimeout(() => t.classList.add('active'), 50);
         }
     }
 };
 
+/* ─── GAME ─── */
 const Game = {
     cvs: null, ctx: null,
     w: 800, h: 1200,
     running: false,
     gameScore: { red: 0, blue: 0 },
-    
-    activePlayers: {}, 
+    activePlayers: {},
     ball: { x: 400, y: 600, vx: 0, vy: 0, r: 28, targetX: 400, targetY: 600, angle: 0 },
     particles: [],
-    
     joystick: { active: false, maxRadius: 45, dx: 0, dy: 0, id: null, outX: 0, outY: 0 },
     joystickCenter: { x: 0, y: 0 },
-    lastSyncTime: 0,
-    lastTime: 0,
-    animationFrameId: null,
-    
-    wasTouching: false,
-    lastBallX: 400,
-    lastBallY: 600,
-    lastMx: 0,
-    lastMy: 0,
-    lastInputTime: 0,
+    lastSyncTime: 0, lastTime: 0, animationFrameId: null,
+    wasTouching: false, lastBallX: 400, lastBallY: 600, lastMx: 0, lastMy: 0, lastInputTime: 0,
 
     init() {
         this.cvs = document.getElementById('gameCanvas');
         this.ctx = this.cvs.getContext('2d', { alpha: false });
         this.fit();
-        
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => this.fit());
-        } else {
-            window.addEventListener('resize', () => this.fit());
-        }
-        
-        this.setupJoystick();
+        (window.visualViewport || window).addEventListener('resize', () => this.fit());
+        this._setupJoystick();
     },
 
     fit() {
-        const availableW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
-        const availableH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        const scale = Math.min(availableW / this.w, availableH / this.h);
-        this.cvs.width = this.w; 
-        this.cvs.height = this.h;
-        this.cvs.style.width = (this.w * scale) + 'px';
-        this.cvs.style.height = (this.h * scale) + 'px';
+        const vp = window.visualViewport;
+        const W = vp ? vp.width : window.innerWidth;
+        const H = vp ? vp.height : window.innerHeight;
+        const s = Math.min(W / this.w, H / this.h);
+        this.cvs.width = this.w; this.cvs.height = this.h;
+        this.cvs.style.width = (this.w * s) + 'px';
+        this.cvs.style.height = (this.h * s) + 'px';
     },
 
-    setupJoystick() {
+    _setupJoystick() {
         const zone = document.getElementById('game-container');
         const stick = document.getElementById('joystick-stick');
         const base = document.getElementById('joystick-base');
 
-        const handleMove = (e) => {
+        const move = (e) => {
             if (!this.joystick.active) return;
             e.preventDefault();
-            
-            let clientX, clientY;
+            let cx, cy;
             if (e.touches) {
-                let touchFound = false;
+                let found = false;
                 for (let i = 0; i < e.touches.length; i++) {
                     if (e.touches[i].identifier === this.joystick.id) {
-                        clientX = e.touches[i].clientX;
-                        clientY = e.touches[i].clientY;
-                        touchFound = true;
-                        break;
+                        cx = e.touches[i].clientX; cy = e.touches[i].clientY; found = true; break;
                     }
                 }
-                if (!touchFound) return;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-
-            let dx = clientX - this.joystickCenter.x;
-            let dy = clientY - this.joystickCenter.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            let visualDx = dx, visualDy = dy;
-            if (dist > this.joystick.maxRadius) {
-                visualDx = (dx / dist) * this.joystick.maxRadius;
-                visualDy = (dy / dist) * this.joystick.maxRadius;
-                dx = visualDx;
-                dy = visualDy;
-            }
-
-            stick.style.transform = `translate(calc(-50% + ${visualDx}px), calc(-50% + ${visualDy}px))`;
-            this.joystick.dx = dx;
-            this.joystick.dy = dy;
+                if (!found) return;
+            } else { cx = e.clientX; cy = e.clientY; }
+            let dx = cx - this.joystickCenter.x, dy = cy - this.joystickCenter.y;
+            const d = Math.sqrt(dx*dx + dy*dy);
+            if (d > this.joystick.maxRadius) { dx = dx/d*this.joystick.maxRadius; dy = dy/d*this.joystick.maxRadius; }
+            stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            this.joystick.dx = dx; this.joystick.dy = dy;
         };
 
-        const handleStart = (e) => {
-            if (e.target.closest('.hud') || e.target.closest('.fs-btn') || e.target.closest('.sound-btn') || e.target.closest('#overlay')) return;
+        const start = (e) => {
+            if (e.target.closest('.hud,.fs-btn,.sound-btn,#overlay')) return;
             if (this.joystick.active) return;
-            
-            let clientX, clientY;
-            if (e.touches) {
-                this.joystick.id = e.changedTouches[0].identifier;
-                clientX = e.changedTouches[0].clientX;
-                clientY = e.changedTouches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-
-            this.joystickCenter = { x: clientX, y: clientY };
-            base.style.left = clientX + 'px';
-            base.style.top = clientY + 'px';
-            base.style.display = 'block';
-
-            this.joystick.active = true;
-            this.joystick.dx = 0;
-            this.joystick.dy = 0;
-            stick.style.transition = 'none';
-            handleMove(e);
+            let cx, cy;
+            if (e.touches) { this.joystick.id = e.changedTouches[0].identifier; cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY; }
+            else { cx = e.clientX; cy = e.clientY; }
+            this.joystickCenter = { x: cx, y: cy };
+            base.style.left = cx + 'px'; base.style.top = cy + 'px'; base.style.display = 'block';
+            this.joystick.active = true; this.joystick.dx = 0; this.joystick.dy = 0;
+            stick.style.transition = 'none'; move(e);
         };
 
-        const handleEnd = (e) => {
+        const end = (e) => {
             if (!this.joystick.active) return;
             if (e.touches) {
-                let stillActive = false;
-                for (let i = 0; i < e.touches.length; i++) {
-                    if (e.touches[i].identifier === this.joystick.id) stillActive = true;
-                }
-                if (stillActive) return;
+                for (let i = 0; i < e.touches.length; i++)
+                    if (e.touches[i].identifier === this.joystick.id) return;
             }
-            
-            this.joystick.active = false;
-            this.joystick.dx = 0;
-            this.joystick.dy = 0;
-            this.joystick.id = null;
-            stick.style.transition = 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)';
-            stick.style.transform = `translate(-50%, -50%)`;
+            this.joystick.active = false; this.joystick.dx = 0; this.joystick.dy = 0; this.joystick.id = null;
+            stick.style.transition = 'transform 0.15s cubic-bezier(0.2,0.8,0.2,1)';
+            stick.style.transform = 'translate(-50%,-50%)';
             base.style.display = 'none';
         };
 
-        zone.addEventListener('touchstart', handleStart, { passive: false });
-        window.addEventListener('touchmove', handleMove, { passive: false });
-        window.addEventListener('touchend', handleEnd);
-        window.addEventListener('touchcancel', handleEnd);
-        
-        zone.addEventListener('mousedown', handleStart);
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleEnd);
+        zone.addEventListener('touchstart', start, { passive: false });
+        window.addEventListener('touchmove', move, { passive: false });
+        window.addEventListener('touchend', end);
+        window.addEventListener('touchcancel', end);
+        zone.addEventListener('mousedown', start);
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', end);
     },
 
-    spawnParticles(x, y, color, count) {
-        for(let i=0; i<count; i++) {
-            this.particles.push({
-                x: x, y: y,
-                vx: (Math.random() - 0.5) * 15,
-                vy: (Math.random() - 0.5) * 15,
-                r: Math.random() * 4 + 2,
-                color: color,
-                alpha: 1,
-                decay: Math.random() * 0.05 + 0.02
-            });
-        }
+    spawnParticles(x, y, color, n) {
+        for (let i = 0; i < n; i++) this.particles.push({
+            x, y,
+            vx: (Math.random()-.5)*15, vy: (Math.random()-.5)*15,
+            r: Math.random()*4+2, color, alpha: 1, decay: Math.random()*.05+.02
+        });
     },
 
     begin(playerData) {
         if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
-
         this.gameScore = { red: 0, blue: 0 };
-        this.activePlayers = {};
-        this.particles = [];
-        this.wasTouching = false;
+        this.activePlayers = {}; this.particles = []; this.wasTouching = false;
         let myTeam = 'red';
 
-        for(let id in playerData) {
+        for (const id in playerData) {
             const p = playerData[id];
-            if(id === Net.myId) myTeam = p.team;
-            
+            if (id === Net.myId) myTeam = p.team;
             this.activePlayers[id] = {
-                id: id,
-                name: p.name,
-                team: p.team,
+                id, name: p.name, team: p.team,
                 color: p.team === 'red' ? '#e53935' : '#1e88e5',
-                r: 48,
-                x: 400, y: 600,
-                targetX: 400, targetY: 600,
+                r: 48, x: 400, y: 600, targetX: 400, targetY: 600,
                 input: { mx: 0, my: 0 }
             };
         }
-        
-        this.resetPositions();
-        this.syncScoreUI();
 
-        this.lastBallX = this.ball.x;
-        this.lastBallY = this.ball.y;
-        this.lastMx = 0;
-        this.lastMy = 0;
-
-        if (myTeam === 'blue') {
-            this.cvs.style.transform = 'rotate(180deg)';
-        } else {
-            this.cvs.style.transform = 'none';
-        }
+        this.resetPositions(); this.syncScoreUI();
+        this.lastBallX = this.ball.x; this.lastBallY = this.ball.y;
+        this.lastMx = 0; this.lastMy = 0;
+        this.cvs.style.transform = myTeam === 'blue' ? 'rotate(180deg)' : 'none';
 
         const popup = document.getElementById('instruction-popup');
-        if (myTeam === 'red') {
-            popup.innerHTML = "SCORE IN THE<br><span style='color: var(--player-blue)'>BLUE GOAL!</span>";
-        } else {
-            popup.innerHTML = "SCORE IN THE<br><span style='color: var(--player-red)'>RED GOAL!</span>";
-        }
+        popup.innerHTML = myTeam === 'red'
+            ? "SCORE IN THE<br><span style='color:var(--player-blue)'>BLUE GOAL!</span>"
+            : "SCORE IN THE<br><span style='color:var(--player-red)'>RED GOAL!</span>";
         popup.style.display = 'block';
         setTimeout(() => popup.classList.add('show'), 50);
-        setTimeout(() => {
-            popup.classList.remove('show');
-            setTimeout(() => popup.style.display = 'none', 300);
-        }, 2500);
+        setTimeout(() => { popup.classList.remove('show'); setTimeout(() => popup.style.display = 'none', 300); }, 2500);
 
         const controls = document.getElementById('post-game-controls');
         if (Net.isHost) {
             controls.innerHTML = `
-                <button id="btn-rematch" style="background: linear-gradient(145deg, var(--accent), #f57f17);">REMATCH</button>
-                <button id="btn-lobby" style="background: linear-gradient(145deg, #f5eadd, #d6c6b7); color: #333;">LOBBY / EXIT</button>
-            `;
+                <button id="btn-rematch" style="background:linear-gradient(145deg,var(--accent),#f57f17);">REMATCH</button>
+                <button id="btn-lobby" style="background:linear-gradient(145deg,#f5eadd,#d6c6b7);color:#333;">LOBBY / EXIT</button>`;
             document.getElementById('btn-rematch').onclick = () => {
                 Net.broadcast('START_GAME', { players: Net.players, maxScore: Net.maxScore });
                 this.begin(Net.players);
@@ -1227,277 +824,194 @@ const Game = {
                 location.reload();
             };
         } else {
-            controls.innerHTML = `<button onclick="location.reload()" style="background: linear-gradient(145deg, #f5eadd, #d6c6b7); color: #333;">EXIT GAME</button>`;
+            controls.innerHTML = `<button onclick="location.reload()" style="background:linear-gradient(145deg,#f5eadd,#d6c6b7);color:#333;">EXIT GAME</button>`;
         }
 
         this.running = true;
         document.getElementById('overlay').style.display = 'none';
         UI.go('game');
-
         setTimeout(() => this.fit(), 50);
-
         this.lastTime = performance.now();
-        this.animationFrameId = requestAnimationFrame((t) => this.loop(t));
+        this.animationFrameId = requestAnimationFrame(t => this.loop(t));
     },
 
     resetPositions() {
-        this.ball.x = 400; this.ball.y = 600;
-        this.ball.vx = 0; this.ball.vy = 0;
-        this.ball.targetX = 400; this.ball.targetY = 600;
-        this.ball.angle = 0;
-        
-        let redIdx = 0, blueIdx = 0;
-        for(let id in this.activePlayers) {
+        this.ball.x = 400; this.ball.y = 600; this.ball.vx = 0; this.ball.vy = 0;
+        this.ball.targetX = 400; this.ball.targetY = 600; this.ball.angle = 0;
+        let ri = 0, bi = 0;
+        for (const id in this.activePlayers) {
             const p = this.activePlayers[id];
-            if(p.team === 'red') {
-                p.x = 300 + (redIdx % 3) * 100;
-                p.y = 1050 - Math.floor(redIdx/3)*100;
-                redIdx++;
+            if (p.team === 'red') {
+                p.x = 300 + (ri%3)*100; p.y = 1050 - Math.floor(ri/3)*100; ri++;
             } else {
-                p.x = 300 + (blueIdx % 3) * 100;
-                p.y = 150 + Math.floor(blueIdx/3)*100;
-                blueIdx++;
+                p.x = 300 + (bi%3)*100; p.y = 150 + Math.floor(bi/3)*100; bi++;
             }
-            p.targetX = p.x;
-            p.targetY = p.y;
-            p.input = { mx: 0, my: 0 };
+            p.targetX = p.x; p.targetY = p.y; p.input = { mx: 0, my: 0 };
         }
     },
 
     update(dt) {
         if (!this.running) return;
         const fps60 = dt * 60;
+        let tmx = 0, tmy = 0;
+        const dz = 6;
 
-        let targetMx = 0, targetMy = 0;
-        const deadZone = 6;
-        
-        if (this.joystick.active && (this.joystick.dx !== 0 || this.joystick.dy !== 0)) {
-            const dist = Math.sqrt(this.joystick.dx**2 + this.joystick.dy**2);
-            if (dist > deadZone) {
-                const normalizedDist = Math.min((dist - deadZone) / (this.joystick.maxRadius - deadZone), 1);
-                targetMx = (this.joystick.dx / dist) * normalizedDist;
-                targetMy = (this.joystick.dy / dist) * normalizedDist;
+        if (this.joystick.active && (this.joystick.dx || this.joystick.dy)) {
+            const d = Math.sqrt(this.joystick.dx**2 + this.joystick.dy**2);
+            if (d > dz) {
+                const nd = Math.min((d - dz) / (this.joystick.maxRadius - dz), 1);
+                tmx = (this.joystick.dx / d) * nd;
+                tmy = (this.joystick.dy / d) * nd;
             }
-
-            if (this.activePlayers[Net.myId] && this.activePlayers[Net.myId].team === 'blue') {
-                targetMx = -targetMx;
-                targetMy = -targetMy;
-            }
+            if (this.activePlayers[Net.myId]?.team === 'blue') { tmx = -tmx; tmy = -tmy; }
         }
 
-        this.joystick.outX += (targetMx - this.joystick.outX) * Math.min(dt * 25, 1);
-        this.joystick.outY += (targetMy - this.joystick.outY) * Math.min(dt * 25, 1);
-
+        this.joystick.outX += (tmx - this.joystick.outX) * Math.min(dt*25, 1);
+        this.joystick.outY += (tmy - this.joystick.outY) * Math.min(dt*25, 1);
         if (Math.abs(this.joystick.outX) < 0.01) this.joystick.outX = 0;
         if (Math.abs(this.joystick.outY) < 0.01) this.joystick.outY = 0;
 
-        let mx = Math.round(this.joystick.outX * 100) / 100;
-        let my = Math.round(this.joystick.outY * 100) / 100;
-
-        if(this.activePlayers[Net.myId]) {
-            this.activePlayers[Net.myId].input = { mx, my };
-        }
+        const mx = Math.round(this.joystick.outX * 100) / 100;
+        const my = Math.round(this.joystick.outY * 100) / 100;
+        if (this.activePlayers[Net.myId]) this.activePlayers[Net.myId].input = { mx, my };
 
         if (!Net.isHost) {
             const now = Date.now();
-            if (Math.abs(mx - this.lastMx) > 0.05 || Math.abs(my - this.lastMy) > 0.05 || now - this.lastInputTime > 50) {
+            if (Math.abs(mx-this.lastMx) > 0.05 || Math.abs(my-this.lastMy) > 0.05 || now-this.lastInputTime > 50) {
                 Net.sendToHost('PLAYER_INPUT', { mx, my });
-                this.lastMx = mx;
-                this.lastMy = my;
-                this.lastInputTime = now;
+                this.lastMx = mx; this.lastMy = my; this.lastInputTime = now;
             }
-            
-            const ballLerp = 1 - Math.pow(1 - 0.4, fps60);
-            this.ball.x += (this.ball.targetX - this.ball.x) * ballLerp;
-            this.ball.y += (this.ball.targetY - this.ball.y) * ballLerp;
-            
-            const speed = Math.sqrt((this.ball.targetX - this.lastBallX)**2 + (this.ball.targetY - this.lastBallY)**2);
-            this.ball.angle += speed * 0.05 * fps60;
+            const bl = 1 - Math.pow(1-0.4, fps60);
+            this.ball.x += (this.ball.targetX - this.ball.x) * bl;
+            this.ball.y += (this.ball.targetY - this.ball.y) * bl;
+            const spd = Math.sqrt((this.ball.targetX-this.lastBallX)**2 + (this.ball.targetY-this.lastBallY)**2);
+            this.ball.angle += spd * 0.05 * fps60;
 
-            for(let id in this.activePlayers) {
-                let p = this.activePlayers[id];
+            for (const id in this.activePlayers) {
+                const p = this.activePlayers[id];
                 if (id === Net.myId) {
-                    const speedFactor = 600 * dt; 
-                    p.x += p.input.mx * speedFactor;
-                    p.y += p.input.my * speedFactor;
-                    
-                    p.x = Math.max(p.r, Math.min(this.w - p.r, p.x));
-                    p.y = Math.max(p.r, Math.min(this.h - p.r, p.y));
-
-                    const correctionLerp = 1 - Math.pow(1 - 0.15, fps60);
-                    p.x += (p.targetX - p.x) * correctionLerp;
-                    p.y += (p.targetY - p.y) * correctionLerp;
+                    p.x += p.input.mx * 600 * dt;
+                    p.y += p.input.my * 600 * dt;
+                    p.x = Math.max(p.r, Math.min(this.w-p.r, p.x));
+                    p.y = Math.max(p.r, Math.min(this.h-p.r, p.y));
+                    const cl = 1 - Math.pow(1-0.15, fps60);
+                    p.x += (p.targetX - p.x) * cl;
+                    p.y += (p.targetY - p.y) * cl;
                 } else {
-                    const pLerp = 1 - Math.pow(1 - 0.6, fps60);
-                    p.x += (p.targetX - p.x) * pLerp;
-                    p.y += (p.targetY - p.y) * pLerp;
+                    const pl = 1 - Math.pow(1-0.6, fps60);
+                    p.x += (p.targetX - p.x) * pl;
+                    p.y += (p.targetY - p.y) * pl;
                 }
             }
         } else {
-            this.hostPhysics(dt);
+            this._hostPhysics(dt);
         }
 
-        for(let i = this.particles.length - 1; i >= 0; i--) {
-            let pt = this.particles[i];
-            pt.x += pt.vx;
-            pt.y += pt.vy;
-            pt.vx *= 0.9;
-            pt.vy *= 0.9;
-            pt.alpha -= pt.decay;
-            if(pt.alpha <= 0) this.particles.splice(i, 1);
+        for (let i = this.particles.length-1; i >= 0; i--) {
+            const pt = this.particles[i];
+            pt.x += pt.vx; pt.y += pt.vy; pt.vx *= 0.9; pt.vy *= 0.9; pt.alpha -= pt.decay;
+            if (pt.alpha <= 0) this.particles.splice(i, 1);
         }
 
         if (this.activePlayers[Net.myId]) {
             const p = this.activePlayers[Net.myId];
-            const dx = this.ball.x - p.x;
-            const dy = this.ball.y - p.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-
+            const dx = this.ball.x - p.x, dy = this.ball.y - p.y;
+            const dist = Math.sqrt(dx*dx+dy*dy);
             if (dist < this.ball.r + p.r + 5) {
                 if (!this.wasTouching) {
-                    const playerSpeed = Math.sqrt(p.input.mx**2 + p.input.my**2);
-                    const bdx = this.ball.x - (this.lastBallX || this.ball.x);
-                    const bdy = this.ball.y - (this.lastBallY || this.ball.y);
-                    const ballSpeed = Math.sqrt(bdx*bdx + bdy*bdy) / (dt * 60) || 0;
-                    
-                    let intensity = (playerSpeed * 0.7) + (ballSpeed / 20 * 0.3);
+                    const ps = Math.sqrt(p.input.mx**2 + p.input.my**2);
+                    const bdx = this.ball.x - this.lastBallX, bdy = this.ball.y - this.lastBallY;
+                    const bs = Math.sqrt(bdx*bdx+bdy*bdy) / (dt*60) || 0;
+                    const intensity = ps*0.7 + bs/20*0.3;
                     AudioSystem.playBallHit(intensity);
-                    
-                    if (window.navigator && window.navigator.vibrate && intensity > 0.2) {
-                        navigator.vibrate(15);
-                    }
+                    if (navigator.vibrate && intensity > 0.2) navigator.vibrate(15);
                     this.spawnParticles(this.ball.x - dx/2, this.ball.y - dy/2, 'rgba(255,255,255,0.8)', 6);
-
                     this.wasTouching = true;
                 }
-            } else {
-                this.wasTouching = false;
-            }
+            } else { this.wasTouching = false; }
         }
 
-        this.lastBallX = this.ball.x;
-        this.lastBallY = this.ball.y;
+        this.lastBallX = this.ball.x; this.lastBallY = this.ball.y;
     },
 
-    hostPhysics(dt) {
-        const speedFactor = 600 * dt;
-        const fps60 = dt * 60;
-
-        for(let id in this.activePlayers) {
+    _hostPhysics(dt) {
+        const sf = 600 * dt, fps60 = dt * 60;
+        for (const id in this.activePlayers) {
             const p = this.activePlayers[id];
-            p.x += p.input.mx * speedFactor;
-            p.y += p.input.my * speedFactor;
-            p.x = Math.max(p.r, Math.min(this.w - p.r, p.x));
-            p.y = Math.max(p.r, Math.min(this.h - p.r, p.y));
-            p.targetX = p.x;
-            p.targetY = p.y;
+            p.x += p.input.mx * sf; p.y += p.input.my * sf;
+            p.x = Math.max(p.r, Math.min(this.w-p.r, p.x));
+            p.y = Math.max(p.r, Math.min(this.h-p.r, p.y));
+            p.targetX = p.x; p.targetY = p.y;
         }
 
         this.ball.x += this.ball.vx * fps60;
         this.ball.y += this.ball.vy * fps60;
-        
-        let speed = Math.sqrt(this.ball.vx**2 + this.ball.vy**2);
-        this.ball.angle += speed * 0.05 * fps60;
-        
-        this.ball.vx *= Math.pow(0.975, fps60); 
+        const spd = Math.sqrt(this.ball.vx**2 + this.ball.vy**2);
+        this.ball.angle += spd * 0.05 * fps60;
+        this.ball.vx *= Math.pow(0.975, fps60);
         this.ball.vy *= Math.pow(0.975, fps60);
-        this.ball.targetX = this.ball.x;
-        this.ball.targetY = this.ball.y;
+        this.ball.targetX = this.ball.x; this.ball.targetY = this.ball.y;
 
-        const goalWidth = 240;
-        const goalLeft = (this.w - goalWidth) / 2;
-        const goalRight = goalLeft + goalWidth;
+        const gw = 240, gl = (this.w-gw)/2, gr = gl+gw;
 
         if (this.ball.y <= this.ball.r) {
-            if (this.ball.x > goalLeft && this.ball.x < goalRight) {
-                this.gameScore.red++;
-                this.onGoal('red');
-                return;
-            } else {
-                this.ball.vy *= -0.7;
-                this.ball.y = this.ball.r;
-            }
+            if (this.ball.x > gl && this.ball.x < gr) { this.gameScore.red++; this._onGoal('red'); return; }
+            else { this.ball.vy *= -0.7; this.ball.y = this.ball.r; }
         }
-        if (this.ball.y >= this.h - this.ball.r) {
-            if (this.ball.x > goalLeft && this.ball.x < goalRight) {
-                this.gameScore.blue++;
-                this.onGoal('blue');
-                return;
-            } else {
-                this.ball.vy *= -0.7;
-                this.ball.y = this.h - this.ball.r;
-            }
+        if (this.ball.y >= this.h-this.ball.r) {
+            if (this.ball.x > gl && this.ball.x < gr) { this.gameScore.blue++; this._onGoal('blue'); return; }
+            else { this.ball.vy *= -0.7; this.ball.y = this.h-this.ball.r; }
         }
-        
-        if (this.ball.x < this.ball.r || this.ball.x > this.w - this.ball.r) {
-            this.ball.vx *= -0.7;
-            this.ball.x = this.ball.x < this.ball.r ? this.ball.r : this.w - this.ball.r;
-        }
+        if (this.ball.x < this.ball.r) { this.ball.vx *= -0.7; this.ball.x = this.ball.r; }
+        if (this.ball.x > this.w-this.ball.r) { this.ball.vx *= -0.7; this.ball.x = this.w-this.ball.r; }
 
-        for(let id in this.activePlayers) {
+        for (const id in this.activePlayers) {
             const p = this.activePlayers[id];
-            const dx = this.ball.x - p.x;
-            const dy = this.ball.y - p.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            
-            if (dist < this.ball.r + p.r) {
+            const dx = this.ball.x-p.x, dy = this.ball.y-p.y;
+            const dist = Math.sqrt(dx*dx+dy*dy);
+            if (dist < this.ball.r+p.r) {
                 const angle = Math.atan2(dy, dx);
-                const playerSpeed = Math.sqrt(p.input.mx**2 + p.input.my**2);
-                
-                const force = 2.5 + (playerSpeed * 6);
-                const cappedForce = Math.min(force, 16);
-
-                this.ball.vx = Math.cos(angle) * cappedForce;
-                this.ball.vy = Math.sin(angle) * cappedForce;
-                
-                this.ball.x = p.x + Math.cos(angle) * (this.ball.r + p.r + 1);
-                this.ball.y = p.y + Math.sin(angle) * (this.ball.r + p.r + 1);
+                const ps = Math.sqrt(p.input.mx**2 + p.input.my**2);
+                const force = Math.min(2.5 + ps*6, 16);
+                this.ball.vx = Math.cos(angle)*force;
+                this.ball.vy = Math.sin(angle)*force;
+                this.ball.x = p.x + Math.cos(angle)*(this.ball.r+p.r+1);
+                this.ball.y = p.y + Math.sin(angle)*(this.ball.r+p.r+1);
             }
         }
 
         const now = Date.now();
         if (now - this.lastSyncTime > 40) {
-            const state = {
-                b: { x: this.ball.x, y: this.ball.y },
-                p: {}
-            };
-            for(let id in this.activePlayers) {
-                state.p[id] = { x: this.activePlayers[id].x, y: this.activePlayers[id].y };
-            }
+            const state = { b: { x: this.ball.x, y: this.ball.y }, p: {} };
+            for (const id in this.activePlayers) state.p[id] = { x: this.activePlayers[id].x, y: this.activePlayers[id].y };
             Net.broadcast('GAME_STATE', state);
             this.lastSyncTime = now;
         }
     },
 
-    onGoal(scoringTeam) {
-        Net.broadcast('GOAL', { score: this.gameScore, team: scoringTeam });
-        this.goalEffect(scoringTeam);
+    _onGoal(team) {
+        Net.broadcast('GOAL', { score: this.gameScore, team });
+        this.goalEffect(team);
         if (this.gameScore.red >= Net.maxScore || this.gameScore.blue >= Net.maxScore) {
             const winner = this.gameScore.red >= Net.maxScore ? 'RED' : 'BLUE';
-            Net.broadcast('END_GAME', { score: this.gameScore, winner: winner });
+            Net.broadcast('END_GAME', { score: this.gameScore, winner });
             this.endGame(winner);
         }
     },
 
-    goalEffect(scoringTeam) {
-        const totalGoals = this.gameScore.red + this.gameScore.blue;
-        const turn = Math.max(0, totalGoals - 1);
-        
-        AudioSystem.playSequential(turn);
-        if (window.navigator && window.navigator.vibrate) navigator.vibrate([50, 50, 100]);
-        
-        this.spawnParticles(this.w/2, scoringTeam === 'red' ? 50 : this.h - 50, scoringTeam === 'red' ? '#e53935' : '#1e88e5', 40);
-
-        this.syncScoreUI();
-        this.resetPositions();
+    goalEffect(team) {
+        const total = this.gameScore.red + this.gameScore.blue;
+        AudioSystem.playSequential(Math.max(0, total-1));
+        if (navigator.vibrate) navigator.vibrate([50,50,100]);
+        this.spawnParticles(this.w/2, team==='red'?50:this.h-50, team==='red'?'#e53935':'#1e88e5', 40);
+        this.syncScoreUI(); this.resetPositions();
     },
 
     remoteSync(state) {
         if (Net.isHost) return;
-        this.ball.targetX = state.b.x;
-        this.ball.targetY = state.b.y;
-        for(let id in state.p) {
-            if(this.activePlayers[id]) {
+        this.ball.targetX = state.b.x; this.ball.targetY = state.b.y;
+        for (const id in state.p) {
+            if (this.activePlayers[id]) {
                 this.activePlayers[id].targetX = state.p[id].x;
                 this.activePlayers[id].targetY = state.p[id].y;
             }
@@ -1505,178 +1019,96 @@ const Game = {
     },
 
     syncScoreUI() {
-        document.getElementById('score-red').innerText = this.gameScore.red;
-        document.getElementById('score-blue').innerText = this.gameScore.blue;
+        document.getElementById('score-red').textContent = this.gameScore.red;
+        document.getElementById('score-blue').textContent = this.gameScore.blue;
     },
 
     endGame(winner) {
         this.running = false;
-        document.getElementById('win-text').innerText = `${winner} WINS!`;
-        document.getElementById('win-text').style.color = winner === 'RED' ? '#ff8a80' : '#82b1ff';
+        document.getElementById('win-text').textContent = `${winner} WINS!`;
+        document.getElementById('win-text').style.color = winner==='RED' ? '#ff8a80' : '#82b1ff';
         document.getElementById('overlay').style.display = 'flex';
     },
 
     draw() {
-        if(!this.ctx) return;
+        if (!this.ctx) return;
         const c = this.ctx;
-        
-        c.fillStyle = '#4e342e';
-        c.fillRect(0,0,this.w,this.h);
+        c.fillStyle = '#4e342e'; c.fillRect(0,0,this.w,this.h);
 
-        c.strokeStyle = 'rgba(255,255,255,0.03)';
-        c.lineWidth = 2;
-        for(let i=0; i<this.w; i+=40) { c.beginPath(); c.moveTo(i,0); c.lineTo(i,this.h); c.stroke(); }
-        for(let j=0; j<this.h; j+=40) { c.beginPath(); c.moveTo(0,j); c.lineTo(this.w,j); c.stroke(); }
-        
-        c.strokeStyle = 'rgba(255,255,255,0.1)';
-        c.lineWidth = 4;
-        c.beginPath(); c.moveTo(0, this.h/2); c.lineTo(this.w, this.h/2); c.stroke();
-        c.beginPath(); c.arc(this.w/2, this.h/2, 80, 0, Math.PI*2); c.stroke();
+        c.strokeStyle = 'rgba(255,255,255,0.03)'; c.lineWidth = 2;
+        for (let i=0; i<this.w; i+=40) { c.beginPath(); c.moveTo(i,0); c.lineTo(i,this.h); c.stroke(); }
+        for (let j=0; j<this.h; j+=40) { c.beginPath(); c.moveTo(0,j); c.lineTo(this.w,j); c.stroke(); }
 
-        const goalWidth = 240;
-        const goalLeft = (this.w - goalWidth) / 2;
-        
-        const gBlue = c.createLinearGradient(0, 0, 0, 40);
-        gBlue.addColorStop(0, 'rgba(21, 101, 192, 0.9)');
-        gBlue.addColorStop(1, 'rgba(13, 71, 161, 0.9)');
-        c.fillStyle = gBlue;
-        c.beginPath(); c.rect(goalLeft, 0, goalWidth, 40); c.fill();
-        c.strokeStyle = 'rgba(255,255,255,0.2)'; c.lineWidth = 2; c.stroke();
-        
-        const gRed = c.createLinearGradient(0, this.h - 40, 0, this.h);
-        gRed.addColorStop(0, 'rgba(198, 40, 40, 0.9)');
-        gRed.addColorStop(1, 'rgba(183, 28, 28, 0.9)');
-        c.fillStyle = gRed;
-        c.beginPath(); c.rect(goalLeft, this.h - 40, goalWidth, 40); c.fill();
-        c.stroke();
+        c.strokeStyle = 'rgba(255,255,255,0.1)'; c.lineWidth = 4;
+        c.beginPath(); c.moveTo(0,this.h/2); c.lineTo(this.w,this.h/2); c.stroke();
+        c.beginPath(); c.arc(this.w/2,this.h/2,80,0,Math.PI*2); c.stroke();
 
-        for(let i=0; i<this.particles.length; i++) {
-            let pt = this.particles[i];
-            c.globalAlpha = pt.alpha;
-            c.fillStyle = pt.color;
-            c.beginPath(); c.arc(pt.x, pt.y, pt.r, 0, Math.PI*2); c.fill();
+        const gw=240, gl=(this.w-gw)/2;
+
+        const gB = c.createLinearGradient(0,0,0,40);
+        gB.addColorStop(0,'rgba(21,101,192,0.9)'); gB.addColorStop(1,'rgba(13,71,161,0.9)');
+        c.fillStyle=gB; c.beginPath(); c.rect(gl,0,gw,40); c.fill();
+        c.strokeStyle='rgba(255,255,255,0.2)'; c.lineWidth=2; c.stroke();
+
+        const gR = c.createLinearGradient(0,this.h-40,0,this.h);
+        gR.addColorStop(0,'rgba(198,40,40,0.9)'); gR.addColorStop(1,'rgba(183,28,28,0.9)');
+        c.fillStyle=gR; c.beginPath(); c.rect(gl,this.h-40,gw,40); c.fill(); c.stroke();
+
+        for (const pt of this.particles) {
+            c.globalAlpha=pt.alpha; c.fillStyle=pt.color;
+            c.beginPath(); c.arc(pt.x,pt.y,pt.r,0,Math.PI*2); c.fill();
         }
-        c.globalAlpha = 1.0;
+        c.globalAlpha=1;
 
-        c.save();
-        c.translate(this.ball.x, this.ball.y);
-        c.rotate(this.ball.angle || 0);
-        
-        let pulse = 1 + Math.sin(Date.now() / 250) * 0.04;
-        let br = this.ball.r * pulse;
-
-        c.shadowColor = 'rgba(0, 0, 0, 0.4)';
-        c.shadowBlur = 10;
-        c.shadowOffsetY = 5;
-        
-        const bGrad = c.createRadialGradient(-br*0.4, -br*0.4, br*0.1, 0, 0, br);
-        bGrad.addColorStop(0, '#ffffff'); 
-        bGrad.addColorStop(0.3, '#fdfbf7'); 
-        bGrad.addColorStop(0.8, '#e6decb'); 
-        bGrad.addColorStop(1, '#c5bba8'); 
-        c.fillStyle = bGrad;
-        
-        c.beginPath(); 
-        c.arc(0, 0, br, 0, Math.PI*2); 
-        c.fill();
-        
-        c.shadowColor = 'transparent'; 
-        c.shadowBlur = 0;
-        c.shadowOffsetY = 0;
-        
-        c.strokeStyle = 'rgba(120, 110, 100, 0.5)'; 
-        c.lineWidth = 2;
-        c.beginPath(); 
-        c.arc(0, 0, br, 0, Math.PI*2); 
-        c.stroke();
-        
-        c.fillStyle = 'rgba(255,255,255,0.9)';
-        c.beginPath(); c.ellipse(-br*0.3, -br*0.3, br*0.3, br*0.15, Math.PI/4, 0, Math.PI*2); c.fill();
-        
-        c.strokeStyle = 'rgba(0,0,0,0.1)';
-        c.lineWidth = 1;
-        c.beginPath();
-        c.moveTo(-br*0.6, 0);
-        c.quadraticCurveTo(0, br*0.4, br*0.6, 0);
-        c.stroke();
-        
-        c.beginPath();
-        c.moveTo(0, -br*0.6);
-        c.quadraticCurveTo(br*0.4, 0, 0, br*0.6);
-        c.stroke();
-        
+        /* ball */
+        c.save(); c.translate(this.ball.x,this.ball.y); c.rotate(this.ball.angle||0);
+        const pulse = 1+Math.sin(Date.now()/250)*0.04, br = this.ball.r*pulse;
+        c.shadowColor='rgba(0,0,0,0.4)'; c.shadowBlur=10; c.shadowOffsetY=5;
+        const bg = c.createRadialGradient(-br*.4,-br*.4,br*.1,0,0,br);
+        bg.addColorStop(0,'#ffffff'); bg.addColorStop(.3,'#fdfbf7'); bg.addColorStop(.8,'#e6decb'); bg.addColorStop(1,'#c5bba8');
+        c.fillStyle=bg; c.beginPath(); c.arc(0,0,br,0,Math.PI*2); c.fill();
+        c.shadowColor='transparent'; c.shadowBlur=0; c.shadowOffsetY=0;
+        c.strokeStyle='rgba(120,110,100,0.5)'; c.lineWidth=2; c.beginPath(); c.arc(0,0,br,0,Math.PI*2); c.stroke();
+        c.fillStyle='rgba(255,255,255,0.9)'; c.beginPath(); c.ellipse(-br*.3,-br*.3,br*.3,br*.15,Math.PI/4,0,Math.PI*2); c.fill();
+        c.strokeStyle='rgba(0,0,0,0.1)'; c.lineWidth=1;
+        c.beginPath(); c.moveTo(-br*.6,0); c.quadraticCurveTo(0,br*.4,br*.6,0); c.stroke();
+        c.beginPath(); c.moveTo(0,-br*.6); c.quadraticCurveTo(br*.4,0,0,br*.6); c.stroke();
         c.restore();
 
-        for(let id in this.activePlayers) {
+        /* players */
+        for (const id in this.activePlayers) {
             const p = this.activePlayers[id];
             const isMe = id === Net.myId;
-            
-            c.save();
-            c.translate(p.x, p.y);
-            
+
+            c.save(); c.translate(p.x,p.y);
             if (isMe) {
-                c.beginPath();
-                c.arc(0, 0, p.r + 12, 0, Math.PI * 2);
-                c.fillStyle = p.team === 'red' ? 'rgba(229, 57, 53, 0.15)' : 'rgba(30, 136, 229, 0.15)';
-                c.fill();
+                c.beginPath(); c.arc(0,0,p.r+12,0,Math.PI*2);
+                c.fillStyle = p.team==='red'?'rgba(229,57,53,0.15)':'rgba(30,136,229,0.15)'; c.fill();
             }
-
-            c.fillStyle = 'rgba(0,0,0,0.3)';
-            c.beginPath(); c.arc(0, 8, p.r, 0, Math.PI*2); c.fill();
-
-            const pGrad = c.createRadialGradient(-p.r/3, -p.r/3, p.r/5, 0, 0, p.r);
-            if (p.team === 'red') {
-                pGrad.addColorStop(0, '#ef5350');
-                pGrad.addColorStop(1, '#b71c1c');
-            } else {
-                pGrad.addColorStop(0, '#42a5f5');
-                pGrad.addColorStop(1, '#0d47a1');
-            }
-            
-            c.fillStyle = pGrad;
-            c.beginPath(); c.arc(0,0,p.r,0,Math.PI*2); c.fill();
-            
-            c.strokeStyle = '#1a0b08';
-            c.lineWidth = isMe ? 5 : 3;
-            c.stroke();
-            
-            c.fillStyle = 'rgba(255,255,255,0.15)';
-            c.beginPath();
-            c.arc(0, -p.r/4, p.r/1.5, 0, Math.PI, true);
-            c.fill();
-            
-            c.fillStyle = 'white';
-            const eyeX = p.team === 'red' ? 16 : -16;
-            c.beginPath(); c.arc(eyeX, -12, 6, 0, Math.PI*2); c.fill();
-            c.beginPath(); c.arc(eyeX, 12, 6, 0, Math.PI*2); c.fill();
-            
-            c.fillStyle = '#1a0b08';
-            c.beginPath(); c.arc(eyeX + (p.team==='red'?1:-1), -12, 2.5, 0, Math.PI*2); c.fill();
-            c.beginPath(); c.arc(eyeX + (p.team==='red'?1:-1), 12, 2.5, 0, Math.PI*2); c.fill();
-            
+            c.fillStyle='rgba(0,0,0,0.3)'; c.beginPath(); c.arc(0,8,p.r,0,Math.PI*2); c.fill();
+            const pg = c.createRadialGradient(-p.r/3,-p.r/3,p.r/5,0,0,p.r);
+            if (p.team==='red') { pg.addColorStop(0,'#ef5350'); pg.addColorStop(1,'#b71c1c'); }
+            else { pg.addColorStop(0,'#42a5f5'); pg.addColorStop(1,'#0d47a1'); }
+            c.fillStyle=pg; c.beginPath(); c.arc(0,0,p.r,0,Math.PI*2); c.fill();
+            c.strokeStyle='#1a0b08'; c.lineWidth=isMe?5:3; c.stroke();
+            c.fillStyle='rgba(255,255,255,0.15)'; c.beginPath(); c.arc(0,-p.r/4,p.r/1.5,0,Math.PI,true); c.fill();
+            const ex = p.team==='red'?16:-16;
+            c.fillStyle='white';
+            c.beginPath(); c.arc(ex,-12,6,0,Math.PI*2); c.fill();
+            c.beginPath(); c.arc(ex,12,6,0,Math.PI*2); c.fill();
+            c.fillStyle='#1a0b08';
+            c.beginPath(); c.arc(ex+(p.team==='red'?1:-1),-12,2.5,0,Math.PI*2); c.fill();
+            c.beginPath(); c.arc(ex+(p.team==='red'?1:-1),12,2.5,0,Math.PI*2); c.fill();
             c.restore();
-            
+
             c.save();
-            if(this.activePlayers[Net.myId] && this.activePlayers[Net.myId].team === 'blue') {
-                c.translate(p.x, p.y + p.r + 25);
-                c.rotate(Math.PI);
-            } else {
-                c.translate(p.x, p.y - p.r - 25);
-            }
-
-            c.font = '700 16px "Roboto Slab", serif';
-            c.textAlign = 'center';
-            c.textBaseline = 'middle';
-            
-            const textMetrics = c.measureText(p.name);
-            c.fillStyle = 'rgba(0,0,0,0.6)';
-            c.beginPath();
-            c.roundRect(-textMetrics.width/2 - 12, -14, textMetrics.width + 24, 28, 14);
-            c.fill();
-            
-            c.fillStyle = 'white';
-            c.fillText(p.name, 0, 1);
-
+            const myTeam = this.activePlayers[Net.myId]?.team;
+            if (myTeam==='blue') { c.translate(p.x,p.y+p.r+25); c.rotate(Math.PI); }
+            else { c.translate(p.x,p.y-p.r-25); }
+            c.font='700 16px "Roboto Slab",serif'; c.textAlign='center'; c.textBaseline='middle';
+            const tw = c.measureText(p.name).width;
+            c.fillStyle='rgba(0,0,0,0.6)'; c.beginPath(); c.roundRect(-tw/2-12,-14,tw+24,28,14); c.fill();
+            c.fillStyle='white'; c.fillText(p.name,0,1);
             c.restore();
         }
     },
@@ -1684,38 +1116,36 @@ const Game = {
     loop(t) {
         if (!t) t = performance.now();
         let dt = (t - this.lastTime) / 1000;
-        if (dt > 0.1) dt = 0.1; 
+        if (dt > 0.1) dt = 0.1;
         this.lastTime = t;
-        
-        this.update(dt);
-        this.draw();
-        
-        this.animationFrameId = requestAnimationFrame((time) => this.loop(time));
+        this.update(dt); this.draw();
+        this.animationFrameId = requestAnimationFrame(ts => this.loop(ts));
     }
 };
 
+/* ─── BUTTON HANDLERS ─── */
 document.getElementById('btn-create').onclick = () => {
-    document.getElementById('home-error').innerText = "";
-    const rid = Math.floor(100000 + Math.random() * 900000).toString();
+    document.getElementById('home-error').textContent = '';
+    const rid = Math.floor(100000 + Math.random()*900000).toString();
     Net.init(true, rid);
 };
 
 document.getElementById('btn-join').onclick = () => {
-    document.getElementById('home-error').innerText = "";
+    document.getElementById('home-error').textContent = '';
     const rid = document.getElementById('input-room-id').value.trim();
-    if (rid.length !== 6) return alert("Enter 6-digit ID");
+    if (rid.length !== 6 || !/^\d+$/.test(rid)) { document.getElementById('home-error').textContent = 'Enter a valid 6-digit ID'; return; }
     Net.init(false, rid);
 };
 
 document.getElementById('btn-copy').onclick = () => {
-    navigator.clipboard.writeText(Net.room);
-    document.getElementById('btn-copy').innerText = "COPIED!";
-    setTimeout(() => document.getElementById('btn-copy').innerText = "COPY ID", 1500);
+    navigator.clipboard.writeText(Net.room).catch(() => {});
+    document.getElementById('btn-copy').textContent = 'COPIED!';
+    setTimeout(() => document.getElementById('btn-copy').textContent = 'COPY ID', 1500);
 };
 
-document.getElementById('win-points-select').onchange = (e) => {
+document.getElementById('win-points-select').onchange = e => {
     Net.maxScore = parseInt(e.target.value);
-    Net.broadcastLobbyState();
+    Net._broadcastLobbyState();
 };
 
 document.getElementById('btn-start').onclick = () => {
@@ -1724,48 +1154,21 @@ document.getElementById('btn-start').onclick = () => {
     Game.begin(Net.players);
 };
 
-AudioSystem.init();
-Game.init();
-
 document.getElementById('btn-fs').onclick = () => {
-    const docElm = document.documentElement;
-
-    const requestFullscreen = docElm.requestFullscreen || 
-                              docElm.webkitRequestFullscreen || 
-                              docElm.mozRequestFullScreen || 
-                              docElm.msRequestFullscreen;
-                              
-    const exitFullscreen = document.exitFullscreen || 
-                           document.webkitExitFullscreen || 
-                           document.mozCancelFullScreen || 
-                           document.msExitFullscreen;
-
-    const isFullscreen = document.fullscreenElement || 
-                         document.webkitFullscreenElement || 
-                         document.mozFullScreenElement || 
-                         document.msFullscreenElement;
-
-    if (!isFullscreen) {
-        if (requestFullscreen) {
-            requestFullscreen.call(docElm).catch(() => {
-                window.scrollTo(0, 1);
-                alert("For best Full Screen experience on iPhone Safari: Tap the Share icon, then select 'Add to Home Screen'.");
-            });
-        } else {
-            window.scrollTo(0, 1);
-            alert("For best Full Screen experience on iPhone Safari: Tap the Share icon, then select 'Add to Home Screen'.");
-        }
-    } else {
-        if (exitFullscreen) {
-            exitFullscreen.call(document);
-        }
-    }
+    const d = document.documentElement;
+    const req = d.requestFullscreen || d.webkitRequestFullscreen || d.mozRequestFullScreen || d.msRequestFullscreen;
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+    if (!isFull) {
+        if (req) req.call(d).catch(() => alert("For iPhone: Share → Add to Home Screen for fullscreen."));
+        else alert("For iPhone: Share → Add to Home Screen for fullscreen.");
+    } else { if (exit) exit.call(document); }
 };
 
 document.getElementById('btn-sound').onclick = () => AudioSystem.toggleMute();
 
 history.pushState(null, null, location.href);
-window.addEventListener('popstate', function(event) {
+window.addEventListener('popstate', () => {
     history.pushState(null, null, location.href);
     document.getElementById('exit-dialog').style.display = 'flex';
 });
@@ -1775,16 +1178,14 @@ document.getElementById('btn-exit-cancel').onclick = () => {
 };
 
 document.getElementById('btn-exit-ok').onclick = () => {
-    if (Net.peer) {
-        Net.peer.destroy();
-    }
-    window.removeEventListener('popstate', arguments.callee);
+    if (Net.peer) try { Net.peer.destroy(); } catch(e) {}
     history.back();
-    
-    setTimeout(() => {
-        window.close();
-    }, 100);
+    setTimeout(() => window.close(), 100);
 };
+
+/* ─── BOOT ─── */
+AudioSystem.init();
+Game.init();
 </script>
 </body>
 </html>
